@@ -1,7 +1,7 @@
 # 2026-08-21 DSH FHL Image 新手用户包
 
 阶段：P8
-状态：已完成本地整理，待远程 Release 更新
+状态：已完成并已同步 GitHub Release
 范围：第一次使用说明 / Windows 用户包 / 发布附件
 
 ## 目标
@@ -29,6 +29,8 @@
 - `pnpm pack:check`：通过；tarball 包含 `README-FIRST.zh-CN.md` 和两张说明插图。
 - `git diff --check`：通过。
 - 未调用真实模型、图片 API 或计费服务。
+- GitHub `main` 和开发分支已更新；`v0.1.0` Release 已替换 tarball 并新增 Windows 用户包。
+- 公开下载 tarball 和 ZIP 的 SHA-256 与本地一致。
 
 ## 用户边界
 
