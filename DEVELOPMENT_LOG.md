@@ -9,6 +9,7 @@
 | `P4-0.1.0-docs-and-local-baseline` | 2026-08-21 | Completed | Promoted package metadata to `0.1.0`, added Chinese installation/configuration/troubleshooting/security/development docs, built the release tarball, refreshed hashes and manifests, reinstalled into a clean temporary profile, and created the local Git baseline. Real chat/API acceptance remains pending user authorization. |
 | `P5-chat-api-configuration` | 2026-08-21 | Completed (user-confirmed) | User confirmed successful FHL Worker API configuration in the DSH chat window through `fhl_image_configure`; the exact trigger prompt and a sanitized record are stored. Worker count and post-restart persistence were not supplied; no image generation/edit request is claimed. |
 | `P6-github-readme-illustrations` | 2026-08-21 | Completed | Added two real-usage screenshots to the bilingual README and `docs/assets/`, included them in the tarball, replaced secret-scanner-looking test fixtures with synthetic names, rebuilt the package, and refreshed the SHA-256/manifests. |
+| `P7-github-publication` | 2026-08-21 | Completed | Created the public repository, published `main`, development branch, baseline tag and `v0.1.0`, created the Release, uploaded five assets, verified the public tarball hash and installed it in a clean DSH profile. Git transport was unavailable, so GitHub Git Data API was used with the local credential manager; no real model or image API was called. |
 
 Detailed evidence:
 
@@ -19,7 +20,7 @@ Detailed evidence:
 
 ## Current Boundary
 
-The source package is ready for local review and future GitHub upload. No
-remote was configured, no push or Release was created. Chat configuration is
-now recorded as user-confirmed; post-restart persistence and a separately
-authorized image request remain optional follow-up gates.
+The source package is publicly available at
+`https://github.com/supart/DSH-FHL-Image-Plugin`. Chat configuration is recorded
+as user-confirmed; post-restart persistence and a separately authorized image
+request remain optional follow-up gates. Do not rewrite or force-push `v0.1.0`.

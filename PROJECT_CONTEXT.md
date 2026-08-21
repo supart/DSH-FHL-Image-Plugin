@@ -8,11 +8,11 @@ FHL Harness desktop project, Android project, installed EXE and existing user
 data.
 
 The current verified breakpoint is offline build/test, tarball safety, clean
-temporary profile installation, `--dump-config` bundle loading and a
-user-confirmed DSH chat configuration. The exact trigger prompt is recorded in
-`docs/CONFIGURATION.zh-CN.md`. Worker count and post-restart persistence were
-not supplied in the confirmation, and no real image generation/edit request is
-claimed by this batch.
+temporary profile installation, `--dump-config` bundle loading, a
+user-confirmed DSH chat configuration and completed public GitHub publication.
+The exact trigger prompt is recorded in `docs/CONFIGURATION.zh-CN.md`. Worker
+count and post-restart persistence were not supplied in the confirmation, and
+no real image generation/edit request is claimed by this batch.
 
 ## Identity
 
@@ -55,6 +55,7 @@ Evidence files:
 - `docs/RELEASE_NOTES.zh-CN.md`
 - `docs/assets/fhl-image-generate-example.png`
 - `docs/assets/fhl-image-edit-example.png`
+- `docs/changes/2026-08-21-github-publication.md`
 
 The documents and README illustrations record the Windows path-with-spaces workaround, the exact
 chat-mediated `fhl_image_configure` trigger prompt, the “no tools” restart
@@ -68,8 +69,9 @@ remain separate checks.
 - Main branch: `main`.
 - Development branch: `dsh-fhl-image/0.1.0-development`.
 - Baseline tag: `dsh-fhl-image-0.1.0-dev.0`.
-- Latest commit: `677188c docs(readme): add real usage illustrations`.
-- No remote, upstream, push or GitHub Release was created.
+- Latest local commit: `3939374 docs(release): record GitHub publication`.
+- Public remote: `https://github.com/supart/DSH-FHL-Image-Plugin`.
+- GitHub `main`, development branch, baseline tag, `v0.1.0` and Release are published.
 - Tarballs remain ignored release attachments and are not committed.
 
 ## Safety Boundaries
@@ -95,4 +97,5 @@ pnpm pack:check
 
 For the next acceptance, optionally restart the same `fhl-image` profile and
 confirm persistence, then request a separately authorized image task. Keep all
-records free of keys and private conversation text.
+records free of keys and private conversation text. Do not rewrite or force-push
+the published `v0.1.0` tag.
