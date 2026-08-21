@@ -75,11 +75,11 @@ remain separate checks.
 - Main branch: `main`.
 - Development branch: `dsh-fhl-image/0.1.0-development`.
 - Baseline tag: `dsh-fhl-image-0.1.0-dev.0`.
-- Latest local commit: `db3856b docs(install): add first-time user bundle`.
+- Latest local commit: `69b3a9c docs(release): record first-time user publication`.
 - Public remote: `https://github.com/supart/DSH-FHL-Image-Plugin`.
-- GitHub `main` and development branch are updated at remote commit
-  `8c49af74acebfd3ea381fcd56497c397a40579a3`; baseline tag and `v0.1.0` remain
-  unchanged, and the Release has six verified assets.
+- GitHub `main` and development branch contain this completed documentation
+  batch; baseline tag and `v0.1.0` remain unchanged, and the Release has six
+  verified assets. The exact remote commit is recorded in the release manifest.
 - Tarballs remain ignored release attachments and are not committed.
 - The Windows first-time-user bundle is also an ignored Release attachment.
 
