@@ -75,7 +75,7 @@ remain separate checks.
 - Main branch: `main`.
 - Development branch: `dsh-fhl-image/0.1.0-development`.
 - Baseline tag: `dsh-fhl-image-0.1.0-dev.0`.
-- Latest local commit: `69b3a9c docs(release): record first-time user publication`.
+- Local `main` and development branches are fast-forwarded through this completed batch.
 - Public remote: `https://github.com/supart/DSH-FHL-Image-Plugin`.
 - GitHub `main` and development branch contain this completed documentation
   batch; baseline tag and `v0.1.0` remain unchanged, and the Release has six
