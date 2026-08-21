@@ -1,0 +1,11 @@
+lib/
+node_modules/
+artifacts/
+.pnpm-store/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+credentials.yaml
+.credentials.yaml
+verification/

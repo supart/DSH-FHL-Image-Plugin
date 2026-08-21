@@ -1,0 +1,10 @@
+# FHL Image is an installable DSH bundle. It mounts the image tools and the
+# chat-configured worker credential tool into a standard web profile.
+- insert:
+    - id: fhl-image
+      name: '@fhl-plugins/dsh-fhl-image'
+      config:
+        baseURL: !!js process.env.FHL_IMAGE_BASE_URL
+        apiKeyEnv: FHL_IMAGE_API_KEY
+        timeoutMs: 180000
+        workerCooldownMs: 60000
