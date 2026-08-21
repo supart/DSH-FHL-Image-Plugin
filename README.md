@@ -23,6 +23,11 @@ chat.
 - Durable DSH attachment output so generated images appear in the conversation.
 - `fhl_image_configure`: configure one or more workers from a chat message.
 
+New to DSH? Read [README-FIRST.zh-CN.md](README-FIRST.zh-CN.md) before installing.
+The `.tgz` is a plugin package, not a standalone application. The GitHub Release
+also provides a Windows user bundle containing the package, installer helper, and
+Chinese quick-start guide.
+
 ## Real Usage Examples
 
 The screenshots below show the model selecting `fhl_image_generate` for a

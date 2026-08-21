@@ -8,6 +8,10 @@
 
 ## 给普通用户的最短路径
 
+如果你从来没有使用过 DSH，请先阅读[第一次使用说明](README-FIRST.zh-CN.md)。
+Release 页面中的 `.tgz` 是插件包，不是可以双击启动的完整软件；推荐下载
+`DSH-FHL-Image-Plugin-0.1.0-Windows-User-Bundle.zip`。
+
 1. 准备 DSH、Node.js 22.19+（或 Node 24+）和 pnpm。
 2. 下载发布附件 `dsh-fhl-image-plugin-0.1.0.tgz`，并与本项目的
    `scripts/install-to-dsh.ps1` 放在同一项目目录。

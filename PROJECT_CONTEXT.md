@@ -10,6 +10,8 @@ data.
 The current verified breakpoint is offline build/test, tarball safety, clean
 temporary profile installation, `--dump-config` bundle loading, a
 user-confirmed DSH chat configuration and completed public GitHub publication.
+The first-time-user guide and Windows bundle are now prepared locally; the
+existing `v0.1.0` Release needs its attachments refreshed.
 The exact trigger prompt is recorded in `docs/CONFIGURATION.zh-CN.md`. Worker
 count and post-restart persistence were not supplied in the confirmation, and
 no real image generation/edit request is claimed by this batch.
@@ -31,8 +33,8 @@ no real image generation/edit request is claimed by this batch.
 - `pnpm build`: passed.
 - `pnpm pack:check`: passed.
 - Tarball contents and sensitive-pattern scan: passed.
-- `dsh-fhl-image-plugin-0.1.0.tgz` SHA-256:
-  `FB6AC375C32B73A9B2ABE75C584FB0D202E251E54C347A9F72A37D1EB66FC3E5`.
+- Fresh `dsh-fhl-image-plugin-0.1.0.tgz` SHA-256:
+  `56FC6EB8B3C4228388BDDFD98B5EE7EF8AC09BAD6F0082D64E5128340F8B5B1D`.
 - Direct DSH source CLI installed the package into a temporary
   `fhl-image-0.1.0` profile and `--dump-config` showed the FHL bundle layer.
 - The official Loader/Include registration tests cover:
@@ -56,6 +58,10 @@ Evidence files:
 - `docs/assets/fhl-image-generate-example.png`
 - `docs/assets/fhl-image-edit-example.png`
 - `docs/changes/2026-08-21-github-publication.md`
+- `README-FIRST.zh-CN.md`
+- `install-fhl-image-plugin.cmd`
+- `scripts/install-fhl-image-plugin.cmd`
+- `docs/changes/2026-08-21-first-time-user-bundle.md`
 
 The documents and README illustrations record the Windows path-with-spaces workaround, the exact
 chat-mediated `fhl_image_configure` trigger prompt, the “no tools” restart
@@ -69,10 +75,11 @@ remain separate checks.
 - Main branch: `main`.
 - Development branch: `dsh-fhl-image/0.1.0-development`.
 - Baseline tag: `dsh-fhl-image-0.1.0-dev.0`.
-- Latest local commit: `3939374 docs(release): record GitHub publication`.
+- Latest local commit before this batch: `7854d13 docs(context): finalize online publication state`.
 - Public remote: `https://github.com/supart/DSH-FHL-Image-Plugin`.
 - GitHub `main`, development branch, baseline tag, `v0.1.0` and Release are published.
 - Tarballs remain ignored release attachments and are not committed.
+- The Windows first-time-user bundle is also an ignored Release attachment.
 
 ## Safety Boundaries
 

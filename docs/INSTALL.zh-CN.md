@@ -1,7 +1,7 @@
 # Windows 安装说明
 
-本文面向第一次安装 DSH 插件的用户。命令默认在 Windows PowerShell 中执行，
-并假设 `dsh` 已能在终端中运行。
+本文面向第一次安装 DSH 插件的用户。命令默认在 Windows PowerShell 中执行。
+本插件不是完整 DSH 软件；如果你还没有 DSH，请先安装 DSH，再回到本文。
 
 ## 1. 准备文件
 
@@ -12,6 +12,10 @@
 - pnpm（仅源码开发需要；安装预构建包时不需要自己编译）。
 - `dsh-fhl-image-plugin-0.1.0.tgz` 预构建包。
 - 本项目中的 `scripts/install-to-dsh.ps1`。
+
+最省事的方式是下载 Release 中的
+`DSH-FHL-Image-Plugin-0.1.0-Windows-User-Bundle.zip`。解压后会同时得到 tarball、
+安装脚本和中文快速开始说明；不要双击 `.tgz`。
 
 将 tarball 放入项目的 `artifacts` 目录（推荐）、项目根目录或 `scripts` 目录，
 辅助脚本都会自动查找；也可以通过 `-TarballPath` 明确指定文件。
