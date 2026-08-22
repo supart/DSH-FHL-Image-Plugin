@@ -13,7 +13,8 @@ user-confirmed DSH chat configuration and completed public GitHub publication.
 The first-time-user guide and Windows bundle are published; the existing
 `v0.1.0` Release now contains the refreshed tarball and user bundle.
 The GitHub homepage has now been reorganized as a Chinese-first single README
-with same-page English anchors; the source change is ready for remote sync.
+with same-page English anchors; the source change is synced to both remote
+branches. Release assets were intentionally left unchanged.
 The exact trigger prompt is recorded in `docs/CONFIGURATION.zh-CN.md`. Worker
 count and post-restart persistence were not supplied in the confirmation, and
 no real image generation/edit request is claimed by this batch.
