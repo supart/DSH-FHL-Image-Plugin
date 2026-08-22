@@ -83,7 +83,8 @@ remain separate checks.
 - Public remote: `https://github.com/supart/DSH-FHL-Image-Plugin`.
 - GitHub `main` and development branch contain this completed documentation
   batch; baseline tag and `v0.1.0` remain unchanged, and the Release has six
-  verified assets. The exact remote commit is recorded in the release manifest.
+  verified assets. The README-only remote commit is recorded in Git history and
+  the dated change record; the Release manifest intentionally remains unchanged.
 - Tarballs remain ignored release attachments and are not committed.
 - The Windows first-time-user bundle is also an ignored Release attachment.
 - This README-only batch does not move `v0.1.0` or refresh Release assets.
