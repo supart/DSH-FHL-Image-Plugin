@@ -12,6 +12,8 @@ temporary profile installation, `--dump-config` bundle loading, a
 user-confirmed DSH chat configuration and completed public GitHub publication.
 The first-time-user guide and Windows bundle are published; the existing
 `v0.1.0` Release now contains the refreshed tarball and user bundle.
+The GitHub homepage has now been reorganized as a Chinese-first single README
+with same-page English anchors; the source change is ready for remote sync.
 The exact trigger prompt is recorded in `docs/CONFIGURATION.zh-CN.md`. Worker
 count and post-restart persistence were not supplied in the confirmation, and
 no real image generation/edit request is claimed by this batch.
@@ -62,6 +64,7 @@ Evidence files:
 - `install-fhl-image-plugin.cmd`
 - `scripts/install-fhl-image-plugin.cmd`
 - `docs/changes/2026-08-21-first-time-user-bundle.md`
+- `docs/changes/2026-08-22-github-readme-chinese-homepage.md`
 
 The documents and README illustrations record the Windows path-with-spaces workaround, the exact
 chat-mediated `fhl_image_configure` trigger prompt, the “no tools” restart
@@ -82,6 +85,7 @@ remain separate checks.
   verified assets. The exact remote commit is recorded in the release manifest.
 - Tarballs remain ignored release attachments and are not committed.
 - The Windows first-time-user bundle is also an ignored Release attachment.
+- This README-only batch does not move `v0.1.0` or refresh Release assets.
 
 ## Safety Boundaries
 

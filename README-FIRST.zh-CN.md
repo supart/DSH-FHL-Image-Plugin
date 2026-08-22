@@ -1,5 +1,7 @@
 # 第一次使用：给没有用过 DSH 的用户
 
+[返回 GitHub 中文主页](README.md#fhl-zh)
+
 ## 先说清楚
 
 `DSH FHL Image` 是 **DeepSeek Harness 的插件**，不是完整的 DSH 软件，也不能

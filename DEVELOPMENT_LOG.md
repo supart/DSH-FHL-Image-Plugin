@@ -11,6 +11,7 @@
 | `P6-github-readme-illustrations` | 2026-08-21 | Completed | Added two real-usage screenshots to the bilingual README and `docs/assets/`, included them in the tarball, replaced secret-scanner-looking test fixtures with synthetic names, rebuilt the package, and refreshed the SHA-256/manifests. |
 | `P7-github-publication` | 2026-08-21 | Completed | Created the public repository, published `main`, development branch, baseline tag and `v0.1.0`, created the Release, uploaded five assets, verified the public tarball hash and installed it in a clean DSH profile. Git transport was unavailable, so GitHub Git Data API was used with the local credential manager; no real model or image API was called. |
 | `P8-first-time-user-bundle` | 2026-08-21 | Completed | Added a Chinese first-time-user guide, a double-click Windows installer helper, clearer plugin-vs-DSH wording, and a user bundle. Rebuilt the tarball, passed the offline gates, fast-forwarded `main`, updated the development branch, refreshed the `v0.1.0` Release and verified public asset hashes. |
+| `P9-github-readme-chinese-homepage` | 2026-08-22 | Completed locally | Made `README.md` the Chinese-first single homepage with same-page English anchors, reduced `README.zh.md` to a compatibility entry, and added a homepage link to the first-time guide. Typecheck, tests, build, pack, link checks and credential-style scan passed. Remote source sync remains the final step; no Release asset or tag changes. |
 
 Detailed evidence:
 
