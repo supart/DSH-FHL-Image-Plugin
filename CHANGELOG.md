@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.2.2
+
+Generated and edited images now render in the conversation. No changes to the
+tool surface, the host half, or the stored credentials, so it is a drop-in
+replacement for `0.2.1`.
+
+### Added
+
+- **A browser half that claims the image row for both image-bearing tools.** The
+  image tools have always returned durable `image` content blocks, but the Tool
+  client draws them only for the built-in `read_image` call
+  (`imageCardModel` returns null for every other Tool name), so a settled
+  `fhl_image_generate`/`fhl_image_edit` result appeared as
+  "Generated 2 image(s) at 1152x2048" with no picture. The bundle now ships
+  `exports["./ui"]` and declares `dsh.client`, registering a keyed
+  `tool.call.toolview` entry for each of the two names; the row shows every
+  durable image through the session-authorized `loadImage` loader and keeps the
+  result envelope text beneath the gallery.
+- `tests/ui-bundle.spec.ts`: five cases that load the *built* `lib/ui.js` behind
+  a stubbed `window.__ModuleLoader__`, assert the registered id, the Cordis
+  `apply`/`inject` surface, the two claimed keys, the absence of a child gallery
+  declaration, and render the registered component through React to prove the
+  gallery emits an `<img>` per reference with its envelope text.
+
+### Changed
+
+- `tsdown` now runs two passes: the existing Node host pass plus a browser pass
+  that emits `lib/ui.js` as the `window.__ModuleLoader__.load({ id, factory })`
+  factory the client module loader registers. React and the other platform-seed
+  specifiers stay external, because the loader answers them from the host module
+  table.
+- `tsconfig.json` adds the `DOM` library, and `react`/`react-dom` are
+  development dependencies used by the render test. Neither reaches the
+  published package, and no `@deepseek-ai/dsh-client-ui-*` package is imported:
+  the client contracts `src/ui.ts` compiles against are declared locally, and
+  the value validation is runtime, so a contract drift degrades to the generic
+  row rather than to a load failure.
+
+### Notes
+
+- `tool.call.images` is deliberately not declared as a child slot. The built-in
+  read_image view already claims it and the slot registry permits exactly one
+  declarer per child key, so a second declaration throws while the client loads.
+- The client half requires a full application restart to load; the host half
+  alone still works without one.
+
 ## 0.2.1
 
 Correctness, credential-hygiene and release-engineering fixes on the desktop

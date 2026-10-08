@@ -14,9 +14,11 @@
 | `P9-github-readme-chinese-homepage` | 2026-08-22 | Completed locally | Made `README.md` the Chinese-first single homepage with same-page English anchors, reduced `README.zh.md` to a compatibility entry, and added a homepage link to the first-time guide. Typecheck, tests, build, pack, link checks and credential-style scan passed. Remote source sync remains the final step; no Release asset or tag changes. |
 | `P10-desktop-0.2.0-port` | 2026-10-02 | Completed locally | Re-targeted the bundle to the official desktop line `0.2.0-rc.2`: peer ranges `>=0.2.0-rc.2 <0.3.0-0`, `Session.events` replaced by derived-message sourcing plus a bounded produced-image memory, deterministic bundle config, prompt section order 2500, no install-time build script, desktop-first docs. Typecheck, 20 tests, build, pack and sensitive scan passed; the tarball installed into the desktop profile through the plugin manager without a version exemption and registered all three tools live. Remote tag/Release and Windows desktop verification remain open. |
 | `P11-0.2.1-hardening` | 2026-10-08 | Completed | Hardened the desktop line against the shipped runtime rather than a source checkout. Fixed five defects: worker reconfiguration now clears slots above the supplied keys instead of leaving revoked keys live; local validation no longer shares the retryable transport code (a blank prompt used to fan out across every worker); implicit edit sources use the newest image rather than the whole produced set; padding-free/base64url/data-URI payloads decode; a failed response body is read as a bounded prefix and cancelled instead of buffered to 64 MiB. Extended redaction to the `task-fatal` rethrow path and to padded key spellings. Test suite 20 -> 71 cases including a new worker-pool suite, tool-execution coverage, and a built-artifact entry test; `tsconfig.test.json` now typechecks `tests/` and immediately surfaced four real fixture type errors. Added GitHub Actions CI on Node 22.19 and 24 with a tarball scan and a bundled-module resolution check, `.gitattributes`, `publishConfig`/`homepage`/`bugs`, a relaxed `~4.0.4` cordis peer, a single product-limit constant table, and the six README-linked Chinese docs in the tarball. A real `fhl_image_generate` request succeeded end to end. Published as `v0.2.1`: `main` and the development branch pushed, tag created, Release asset attached, CI green. |
+| `P12-client-image-row` | 2026-10-08 | Completed locally, browser acceptance pending | Added the browser half (`src/ui.ts`) that claims the keyed `tool.call.toolview` for `fhl_image_generate` and `fhl_image_edit`, so generated and edited images render in the conversation instead of a text-only row. Root cause read from the shipped client: the generic Tool card draws images only for `read_image` (`imageCardModel`), while a keyed toolview replaces that row. The registry permits exactly one declarer of the child `tool.call.images`, already owned by the read_image view, so the new entries claim their keys and render through the host-provided `loadImage` loader instead of declaring a child slot. The server pass gained a browser pass emitting `lib/ui.js` in the `window.__ModuleLoader__.load({ id, factory })` shape the client module loader registers, with React and the other platform seeds external; `tsconfig.test.json` typechecks the new source, and `tests/ui-bundle.spec.ts` loads the built bundle behind a stubbed loader and renders the registered component through React. Typecheck, 74 tests, build and pack pass; the browser row itself needs a desktop restart to observe and is not yet claimed. Version bumped to `0.2.2` because reinstalling an unchanged version reports `ambiguous-install`. |
 
 Detailed evidence:
 
+- [`2026-10-08-0.2.2-client-image-row.md`](docs/changes/2026-10-08-0.2.2-client-image-row.md)
 - [`2026-10-08-0.2.1-hardening.md`](docs/changes/2026-10-08-0.2.1-hardening.md)
 - [`2026-10-02-desktop-0.2.0-port.md`](docs/changes/2026-10-02-desktop-0.2.0-port.md)
 - [`2026-08-21-standalone-plugin-build.md`](docs/changes/2026-08-21-standalone-plugin-build.md)
@@ -34,8 +36,16 @@ official desktop line `0.2.0-rc.2`, is installed and exercised in a local
 the Release carries the tarball, and CI is green on both branches. A real image
 request succeeded, which closes the last verification gap `0.2.0` left open.
 
+Version `0.2.2` adds the browser half that renders generated and edited images
+in the conversation. It is committed and pushed on `main`; it has no tag and no
+Release asset, so the published tarball still lacks the browser half until a
+release is cut, and the browser row itself has not yet been observed in a
+running desktop application (the client half loads only at startup, so
+acceptance needs a full quit, reopen and new session).
+
 Still open: post-restart implicit-edit persistence is intentionally not claimed;
-Windows desktop verification has no record; and the multipart reference field
-naming (`image` for the first reference, `image[]` for the rest) is pinned by a
-test rather than changed, because altering it is a protocol change that needs a
-live endpoint check. Do not rewrite or force-push `v0.1.0`.
+Windows desktop verification has no record; the `0.2.2` browser row has no
+observed acceptance record; and the multipart reference field naming (`image`
+for the first reference, `image[]` for the rest) is pinned by a test rather than
+changed, because altering it is a protocol change that needs a live endpoint
+check. Do not rewrite or force-push `v0.1.0`.
