@@ -1,10 +1,19 @@
 # FHL Image is an installable DSH bundle. It mounts the image tools and the
 # chat-configured worker credential tool into a standard web profile.
+#
+# The desktop application launches from Finder/Start Menu, so no shell
+# environment is assumed here: every value below is literal and deterministic.
+# Override any of them in the profile patch layer
+# (~/.dsh/profiles/<profile>/cordis.patch.yml) with a matching entry:
+#   - id: fhl-image
+#     name: '@fhl-plugins/dsh-fhl-image'
+#     config:
+#       baseURL: https://example.invalid
 - insert:
     - id: fhl-image
       name: '@fhl-plugins/dsh-fhl-image'
       config:
-        baseURL: !!js process.env.FHL_IMAGE_BASE_URL
+        baseURL: 'https://www.fhl.mom'
         apiKeyEnv: FHL_IMAGE_API_KEY
         timeoutMs: 180000
         workerCooldownMs: 60000

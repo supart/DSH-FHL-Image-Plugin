@@ -6,6 +6,7 @@ import type {
   GenerateImageRequest,
   FhlImageSource,
 } from './types.js'
+import { MAX_EDIT_SOURCES, MAX_GENERATE_VARIATIONS } from './types.js'
 
 export const DEFAULT_FHL_IMAGES_BASE_URL = 'https://www.fhl.mom'
 export const DEFAULT_FHL_IMAGE_MODEL = 'gpt-image-2'
@@ -15,7 +16,7 @@ export const DEFAULT_FHL_IMAGE_MAX_RESPONSE_BYTES = 64 * 1024 * 1024
 /** A provider error with a safe, bounded message and no credential material. */
 export class FhlImagesError extends Error {
   readonly status?: number
-  readonly code: 'http' | 'invalid-json' | 'invalid-image' | 'aborted' | 'response-too-large' | 'request'
+  readonly code: 'http' | 'invalid-json' | 'invalid-image' | 'aborted' | 'response-too-large' | 'request' | 'invalid-request'
 
   constructor(
     message: string,
@@ -34,53 +35,82 @@ function endpoint(baseURL: string, path: string): string {
   return normalized.endsWith('/v1') ? `${normalized}/${path}` : `${normalized}/v1/${path}`
 }
 
+// Local argument validation fails deterministically: retrying it on another
+// worker cannot succeed, so it carries its own code instead of the transport's
+// retryable 'request'. Before 0.2.1 a blank prompt was retried against every
+// configured worker (up to 9 x 10 pointless, billable attempts per call).
 function assertPrompt(prompt: string): void {
-  if (prompt.trim().length === 0) throw new FhlImagesError('image prompt must be a non-empty string', 'request')
+  if (prompt.trim().length === 0) throw new FhlImagesError('image prompt must be a non-empty string', 'invalid-request')
 }
 
 function assertApiKey(apiKey: string): void {
-  if (apiKey.trim().length === 0) throw new FhlImagesError('FHL API key is not configured', 'request')
+  if (apiKey.trim().length === 0) throw new FhlImagesError('FHL API key is not configured', 'invalid-request')
 }
 
 function assertCount(count: number): void {
-  if (!Number.isInteger(count) || count < 1 || count > 9) {
-    throw new FhlImagesError('image count must be an integer from 1 to 9', 'request')
+  if (!Number.isInteger(count) || count < 1 || count > MAX_GENERATE_VARIATIONS) {
+    throw new FhlImagesError(`image count must be an integer from 1 to ${String(MAX_GENERATE_VARIATIONS)}`, 'invalid-request')
   }
 }
 
 function assertSources(sources: readonly FhlImageSource[]): void {
-  if (sources.length < 1 || sources.length > 10) {
-    throw new FhlImagesError('image edit accepts 1 to 10 reference images', 'request')
+  if (sources.length < 1 || sources.length > MAX_EDIT_SOURCES) {
+    throw new FhlImagesError(`image edit accepts 1 to ${String(MAX_EDIT_SOURCES)} reference images`, 'invalid-request')
   }
   for (const source of sources) {
-    if (source.data.byteLength === 0) throw new FhlImagesError('reference image is empty', 'request')
+    if (source.data.byteLength === 0) throw new FhlImagesError('reference image is empty', 'invalid-request')
   }
 }
 
 function safeErrorDetail(text: string, apiKey: string): string {
-  const scrubbed = text.replaceAll(apiKey, '[redacted]')
+  // Scrub the key exactly as supplied and its trimmed form: `assertApiKey` only
+  // rejects a whitespace-only value, so a padded key would survive verbatim in
+  // an upstream echo that spells it without the padding. An empty needle would
+  // make `replaceAll` splice the replacement between every character.
+  let scrubbed = text
+  for (const secret of [apiKey, apiKey.trim()]) {
+    if (secret.length > 0) scrubbed = scrubbed.replaceAll(secret, '[redacted]')
+  }
   return scrubbed.replace(/Bearer\s+[A-Za-z0-9._~+\/-]+/gi, 'Bearer [redacted]').replace(/\s+/g, ' ').trim().slice(0, 512)
 }
 
-async function readResponseText(response: Response, maxBytes: number): Promise<string> {
-  if (response.body === null) return response.text()
+/**
+ * How much of a failed response body is retained for the diagnostic message.
+ * Only this prefix ever reaches `safeErrorDetail`, which truncates to 512
+ * characters anyway.
+ */
+const ERROR_BODY_LIMIT_BYTES = 8 * 1024
+
+/**
+ * Read at most `maxBytes` of a response body, cancelling the stream as soon as
+ * the cap is reached so an oversized or hostile body is never buffered whole.
+ * 0.2.0 read the entire body first and only then compared it against the cap,
+ * so one cached error response could allocate up to the 64 MiB limit per task
+ * while contributing 512 characters to the message.
+ */
+async function readBoundedBody(response: Response, maxBytes: number): Promise<{ text: string; exceeded: boolean }> {
+  if (response.body === null) {
+    const text = await response.text()
+    return text.length > maxBytes ? { text: text.slice(0, maxBytes), exceeded: true } : { text, exceeded: false }
+  }
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
-  const chunks: string[] = []
+  let text = ''
   let total = 0
   try {
     while (true) {
       const next = await reader.read()
       if (next.done) break
-      total += next.value.byteLength
-      if (total > maxBytes) {
+      const remaining = maxBytes - total
+      if (next.value.byteLength > remaining) {
+        text += decoder.decode(next.value.subarray(0, Math.max(0, remaining)), { stream: true })
         await reader.cancel()
-        throw new FhlImagesError('FHL Images API response exceeded the local safety limit', 'response-too-large')
+        return { text: `${text}${decoder.decode()}`, exceeded: true }
       }
-      chunks.push(decoder.decode(next.value, { stream: true }))
+      total += next.value.byteLength
+      text += decoder.decode(next.value, { stream: true })
     }
-    chunks.push(decoder.decode())
-    return chunks.join('')
+    return { text: `${text}${decoder.decode()}`, exceeded: false }
   } finally {
     reader.releaseLock()
   }
@@ -90,11 +120,23 @@ function decodeImage(value: unknown, index: number): FhlImageResult {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new FhlImagesError(`FHL Images API returned no base64 image at index ${index}`, 'invalid-image')
   }
-  const clean = value.replace(/^data:image\/[^;]+;base64,/i, '').replace(/\s+/g, '')
-  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(clean) || clean.length % 4 !== 0) {
+  // Accept the shapes real upstreams return: an optional data-URI prefix,
+  // embedded line breaks, base64url alphabet and omitted padding. 0.2.0
+  // required exact padded standard base64, so a decodable payload was rejected
+  // as `invalid-image` and then retried against every configured worker.
+  const normalized = value
+    .replace(/^data:image\/[^;]+;base64,/i, '')
+    .replace(/\s+/g, '')
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .replace(/=+$/, '')
+  // A remainder of one character cannot be a base64 quantum; every other
+  // remainder is completed with padding below.
+  if (!/^[A-Za-z0-9+/]*$/.test(normalized) || normalized.length % 4 === 1) {
     throw new FhlImagesError(`FHL Images API returned invalid base64 image at index ${index}`, 'invalid-image')
   }
-  const data = new Uint8Array(Buffer.from(clean, 'base64'))
+  const padded = normalized.padEnd(normalized.length + (4 - (normalized.length % 4)) % 4, '=')
+  const data = new Uint8Array(Buffer.from(padded, 'base64'))
   if (data.byteLength === 0) throw new FhlImagesError(`FHL Images API returned an empty image at index ${index}`, 'invalid-image')
   return { data, mediaType: 'image/png', name: `fhl-image-${index + 1}.png` }
 }
@@ -152,10 +194,14 @@ async function requestJson(
     }
     throw new FhlImagesError(`FHL Images API request failed: ${safeErrorDetail(String(error), apiKey)}`, 'request')
   }
-  const raw = await readResponseText(response, maxResponseBytes)
   if (!response.ok) {
-    throw new FhlImagesError(`FHL Images API returned HTTP ${response.status}${raw ? `: ${safeErrorDetail(raw, apiKey)}` : ''}`, 'http', response.status)
+    // A failed response contributes at most a bounded diagnostic prefix; the
+    // stream is cancelled rather than buffered to the image-size ceiling.
+    const { text } = await readBoundedBody(response, ERROR_BODY_LIMIT_BYTES)
+    throw new FhlImagesError(`FHL Images API returned HTTP ${response.status}${text ? `: ${safeErrorDetail(text, apiKey)}` : ''}`, 'http', response.status)
   }
+  const { text: raw, exceeded } = await readBoundedBody(response, maxResponseBytes)
+  if (exceeded) throw new FhlImagesError('FHL Images API response exceeded the local safety limit', 'response-too-large')
   try {
     return JSON.parse(raw) as unknown
   } catch {

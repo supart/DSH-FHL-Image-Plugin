@@ -1,4 +1,4 @@
-# DSH FHL Image 0.1.0
+# DSH FHL Image 0.2.1
 
 [中文](#fhl-zh) · [English](#fhl-en)
 
@@ -14,93 +14,38 @@
 > 这是社区项目，不是官方 DeepSeek 或 FHL 产品，也不是完整的 DSH 软件。
 > 使用前必须先安装并能启动 DSH。
 
-### 第一次使用
+### 版本对应
 
-如果你从未使用过 DSH，推荐在 GitHub Release 页面下载：
+| 插件版本 | 目标 DSH | 状态 |
+| --- | --- | --- |
+| `0.2.1` | 官方桌面版 `0.2.0-rc.2` 包线 | 当前版本 |
+| `0.1.0` | 旧 `0.1.1-rc.1` 包线 | 已不再支持 |
 
-```text
-DSH-FHL-Image-Plugin-0.1.0-Windows-User-Bundle.zip
-```
+安装包：`fhl-plugins-dsh-fhl-image-0.2.1.tgz`（Release 附件，或本地
+`pnpm build && pnpm pack` 生成）。`.tgz` 是插件包，**不能双击运行**。
 
-解压后，双击目录根部的：
+### 安装
 
-```text
-install-fhl-image-plugin.cmd
-```
+**官方桌面 App（推荐）**
 
-用户包包含插件 tarball、中文说明、Windows 安装脚本和安全文档。`.tgz` 是插件包，
-不能双击运行。
+1. 进入侧边栏「插件」页面，选择安装，填入 tarball 的绝对路径。
+2. 安装完成后打开该插件的启用开关。
+3. 完全退出并重新打开 App。
+4. 新建会话，确认工具列表中有 `fhl_image_configure`、`fhl_image_generate`、
+   `fhl_image_edit`。
 
-使用前确认 PowerShell 中可以运行：
+也可以直接在会话里让 Agent 用插件管理工具安装本地 tarball。桌面 App 独占管理
+`desktop` profile，因此不要从外部 shell 对它执行 `dsh plugin`。
 
-```powershell
-dsh --help
-node --version
-pnpm --version
-```
+**命令行版 DSH（进阶）**
 
-如果 Windows 阻止双击脚本，可以在解压目录中打开 PowerShell，运行：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 `
-  -Profile fhl-image -TarballPath .\dsh-fhl-image-plugin-0.1.0.tgz
-```
-
-安装后检查插件是否加载：
-
-```powershell
+```sh
+dsh plugin --profile fhl-image add /绝对路径/fhl-plugins-dsh-fhl-image-0.2.1.tgz
 dsh --profile fhl-image --dump-config
-```
-
-输出中应能看到：
-
-```text
-@fhl-plugins/dsh-fhl-image
-fhl-image
-```
-
-然后启动 DSH：
-
-```powershell
 dsh --profile fhl-image
 ```
 
-### 聊天配置生图 API
-
-新建 DSH 会话，先确认工具列表中有：
-
-- `fhl_image_configure`
-- `fhl_image_generate`
-- `fhl_image_edit`
-
-发送这条提示词：
-
-```text
-我想配置 FHL 生图专用 API。请使用 fhl_image_configure 工具，并先告诉我需要如何提供一个或多个 Worker Key；不要调用生图工具。
-```
-
-Agent 询问后，把一个或多个 Worker Key 粘贴到聊天框中，每个 Key 一行。配置阶段只应
-调用 `fhl_image_configure`，不应调用生图工具。成功后只根据脱敏的 Worker 数量确认配置。
-
-聊天配置有一个重要边界：原始 Key 会随用户消息经过当前模型，并可能保留在 DSH 会话
-历史中。不能接受这种传输方式的凭据，请改用 DSH 宿主凭据机制或环境变量。不要把 Key
-发到 GitHub、Codex 主对话、截图、日志或 Issue。
-
-### 第一次生图和编辑
-
-配置成功后，可以发送：
-
-```text
-请使用 FHL 生图工具生成一张极简现代建筑的全彩效果图，生成 1 张，比例 16:9，2K。
-```
-
-有参考图时，把图片拖入聊天框，然后发送：
-
-```text
-请使用这张参考图进行编辑，保留主体特征，生成一张全彩效果图。
-```
-
-结果通过 DSH 附件服务回到对话中。
+完整步骤、验证判据与升级卸载见 [安装说明](docs/INSTALL.zh-CN.md)。
 
 ### 已实现的工具
 
@@ -108,8 +53,54 @@ Agent 询问后，把一个或多个 Worker Key 粘贴到聊天框中，每个 K
 - `fhl_image_generate`：生成一至九张图。
 - `fhl_image_edit`：使用一至十张有序参考图进行编辑或组合。
 
-插件不会启动时探测 API，不会把 Key 写入工具结果、普通诊断、图片附件或源码，也不会
-下载或执行任意远程插件。
+### 聊天配置生图 API
+
+新建会话，先确认工具列表中有上面三个工具，然后发送：
+
+```text
+我想配置 FHL 生图专用 API。请使用 fhl_image_configure 工具，并先告诉我需要如何提供一个或多个 Worker Key；不要调用生图工具。
+```
+
+Agent 询问后，把一个或多个 Worker Key 粘贴到聊天框，每个 Key 一行。配置阶段只应
+调用 `fhl_image_configure`，成功后只根据脱敏的 Worker 数量确认配置。
+
+聊天配置有一个重要边界：原始 Key 会随用户消息经过当前模型，并可能保留在 DSH 会话
+历史中。不能接受这种传输方式的凭据，应改用 DSH 自身的凭据机制直接写入对应引用名
+（`FHL_IMAGE_API_KEY`、`FHL_IMAGE_API_KEY_2`……）。插件配置项 `apiKeyEnv` 只是这些
+引用名的前缀，**不是环境变量**。不要把 Key 发到 GitHub、Codex 主对话、截图、日志
+或 Issue。
+
+### 第一次生图和编辑
+
+```text
+请使用 FHL 生图工具生成一张极简现代建筑的全彩效果图，生成 1 张，比例 16:9，2K。
+```
+
+有参考图时，把图片拖入聊天框：
+
+```text
+请使用这张参考图进行编辑，保留主体特征，生成一张全彩效果图。
+```
+
+编辑时若省略 `sources`，插件会依次使用：当前用户消息里的图片 → 更早的用户上传
+图片 → 本插件在同一会话、同一进程内生成的最近一张图。重启 App 后第三条记忆会
+失效，此时请显式传入上一次结果中的 `attachmentId`。
+
+结果通过 DSH 附件服务回到对话中。
+
+### 覆盖插件配置
+
+默认值写在 bundle 层里，不读取环境变量。需要修改时，在 profile 补丁层覆盖：
+
+```yaml
+# ~/.dsh/profiles/desktop/cordis.patch.yml
+- id: fhl-image
+  name: '@fhl-plugins/dsh-fhl-image'
+  config:
+    baseURL: https://www.fhl.mom
+    timeoutMs: 180000
+    workerCooldownMs: 60000
+```
 
 ### GitHub 页面示例图
 
@@ -121,27 +112,29 @@ Agent 询问后，把一个或多个 Worker Key 粘贴到聊天框中，每个 K
 
 ### 没有工具怎么办
 
-1. 完全关闭旧的 DSH Host。
-2. 确认启动的是 `fhl-image` profile。
-3. 重新运行 `dsh --profile fhl-image`。
-4. 刷新浏览器并新建会话。
+1. 确认插件在「插件」页面已安装且已启用。
+2. 完全退出并重新打开桌面 App（命令行版则停止旧 Host 后重启同一个 profile）。
+3. 新建会话，再检查三个工具。
 
-旧 Host 可能仍然使用旧工具目录；修改插件或重新安装后必须重启 Host。
+旧进程可能仍然只暴露旧工具目录，修改插件或重新安装后必须重启。
+
+如果安装报 `incompatible-version`，说明插件版本与当前 DSH 运行时不匹配：换用对应
+版本的插件，而不是授予版本豁免。详见 [故障排查](docs/TROUBLESHOOTING.zh-CN.md)。
 
 ### 详细文档
 
 - [第一次使用说明](README-FIRST.zh-CN.md)
-- [Windows 安装说明](docs/INSTALL.zh-CN.md)
+- [安装说明（桌面 App 与命令行版）](docs/INSTALL.zh-CN.md)
 - [聊天配置 API](docs/CONFIGURATION.zh-CN.md)
-- [没有工具/启动失败排查](docs/TROUBLESHOOTING.zh-CN.md)
+- [没有工具/安装失败排查](docs/TROUBLESHOOTING.zh-CN.md)
 - [安全与凭据边界](docs/SECURITY.zh-CN.md)
 - [源码开发者说明](docs/DEVELOPMENT.zh-CN.md)
-- [0.1.0 发布说明](docs/RELEASE_NOTES.zh-CN.md)
+- [0.2.1 发布说明](docs/RELEASE_NOTES.zh-CN.md)
 
 ### 许可证与上游关系
 
 本项目使用 MIT 许可证，是独立社区分发，不是官方 DeepSeek 产品。上游 DSH 源码、
-whitecodex、FHL Harness 桌面版、Android 项目、已安装 EXE 和旧数据均保持在项目外，
+whitecodex、FHL Harness 项目、Android 项目、已安装桌面版和旧数据均保持在项目外，
 本项目不会自动修改它们。
 
 <a id="fhl-en"></a>
@@ -159,114 +152,98 @@ chat.
 > FHL product. DeepSeek Harness is in developer preview and plugin APIs may
 > change between releases.
 
+## Version Compatibility
+
+| Plugin | Target DSH | Status |
+| --- | --- | --- |
+| `0.2.1` | Official desktop line `0.2.0-rc.2` | Current |
+| `0.1.0` | Legacy `0.1.1-rc.1` line | Unsupported |
+
+DSH 0.2 checks every `@deepseek-ai/dsh*` peer range against the running runtime
+before installing a bundle and again at startup, so the declared ranges — not
+the plugin version alone — decide whether installation is accepted.
+
 ## Features
 
-- `fhl_image_generate`: one to nine image variations through FHL Images API.
+- `fhl_image_generate`: one to nine image variations through the FHL Images API.
 - `fhl_image_edit`: one to ten ordered reference images, with one to four
   independent edit variations.
-- Up to ten managed image workers using `FHL_IMAGE_API_KEY` through
-  `FHL_IMAGE_API_KEY_10`.
+- Up to ten managed image workers addressed through the DSH credential provider
+  as `FHL_IMAGE_API_KEY` through `FHL_IMAGE_API_KEY_10`.
 - Retryable worker cooldown, per-worker authentication isolation, cancellation,
   bounded responses, and credential redaction.
 - Durable DSH attachment output so generated images appear in the conversation.
 - `fhl_image_configure`: configure one or more workers from a chat message.
 
-New to DSH? Read [README-FIRST.zh-CN.md](README-FIRST.zh-CN.md) before installing.
-The `.tgz` is a plugin package, not a standalone application. The GitHub Release
-also provides a Windows user bundle containing the package, installer helper, and
-Chinese quick-start guide.
+## Install
 
-## Real Usage Examples
+**Official desktop application (recommended).** Open the Plugins page in the
+sidebar, install the `.tgz` by absolute path, switch the plugin on, fully quit
+and reopen the application, then start a new session and confirm the three
+tools. The desktop application owns its `desktop` profile, so do not run
+`dsh plugin` against it from an external shell. You can also ask the Agent to
+install a local tarball with the plugin manager tool.
 
-The screenshots below show the model selecting `fhl_image_generate` for a
-multi-image request and `fhl_image_edit` for a reference-image edit. They are
-included as documentation illustrations only; no credentials or private
-session data are included.
+**CLI profiles.**
 
-![FHL image generation example](docs/assets/fhl-image-generate-example.png)
+```sh
+dsh plugin --profile fhl-image add /absolute/path/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+dsh --profile fhl-image --dump-config
+dsh --profile fhl-image
+```
 
-![FHL reference-image edit example](docs/assets/fhl-image-edit-example.png)
+See [the install guide](docs/INSTALL.zh-CN.md) for verification criteria,
+upgrades, and removal.
 
 ## Chat Configuration
-
-The intended non-programmer flow is:
 
 ```text
 I want to configure FHL image workers. Use fhl_image_configure first; do not call image tools.
 ```
 
-For multiple workers, send one key per line and explicitly ask DSH to add them
-to the image worker pool. The Agent should call `fhl_image_configure`, which
-stores the keys through the DSH credential provider and returns only a masked
-worker count.
+For multiple workers, send one key per line. The Agent calls
+`fhl_image_configure`, which stores the keys through the DSH credential provider
+and returns only a masked worker count.
 
-This mode is intentionally chat-based, so it has an important limitation:
-the original key is part of the user message sent to the selected model and
-may be retained in the DSH session history. Do not use this mode for a key that
-must never be transmitted to the model provider. For that case, configure the
-credential outside chat using the host's credential mechanism or environment:
-
-```text
-FHL_IMAGE_API_KEY=your-key
-FHL_IMAGE_API_KEY_2=another-key
-```
-
+This mode is intentionally chat-based, so the original key is part of the user
+message sent to the selected model and may be retained in the DSH session
+history. A key that must never reach the model provider should be written into
+the credential store directly under the reference name
+(`FHL_IMAGE_API_KEY`, `FHL_IMAGE_API_KEY_2`, …). The `apiKeyEnv` config value is
+only the prefix of those reference names; it is **not** an environment variable.
 The plugin never includes key values in tool results, image artifacts, normal
-diagnostics, or its own error messages. It cannot retract a key already sent
-through the chat model request.
+diagnostics, or its own error messages.
 
-## Install A Prebuilt Package
+## Edit Sources
 
-The first release is distributed as a prebuilt `.tgz` so users do not need to
-authorize a Git `prepare` script:
+`fhl_image_edit` without `sources` resolves references in this order: an image
+in the current user message, then the latest earlier user upload, then the
+newest image this plugin produced earlier in the same session. The last one is
+an in-memory, per-session cache and does not survive an application restart;
+pass the `attachmentId` from a previous result explicitly in that case.
 
-```sh
-dsh plugin --profile fhl-image add ./artifacts/dsh-fhl-image-plugin-0.1.0.tgz
-dsh --profile fhl-image --dump-config
-dsh --profile fhl-image
-```
+## Real Usage Examples
 
-The `dsh plugin` command adds the package to the profile and activates its
-`cordis.patch.yml` bundle layer. Restart DSH after changing installed bundles.
+![FHL image generation example](docs/assets/fhl-image-generate-example.png)
 
-On Windows, the current DSH CLI can split an absolute tarball path when the
-source directory contains spaces. From this checkout, use the helper instead:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 -Profile fhl-image
-```
-
-The helper stages the tarball in the system temporary directory before calling
-`dsh`; it does not copy credentials or user data and does not call an API.
-
-## Install From A Checkout
-
-```sh
-git clone https://github.com/supart/DSH-FHL-Image-Plugin.git
-cd DSH-FHL-Image-Plugin
-pnpm install
-pnpm build
-dsh plugin --profile fhl-image add .
-```
-
-When installing from GitHub, pnpm may require an explicit `allowBuilds` entry
-for the package's `prepare` script. Read the exact package key printed by pnpm,
-review the source, and add only that package to the profile workspace policy.
+![FHL reference-image edit example](docs/assets/fhl-image-edit-example.png)
 
 ## Development
 
-Requirements: Node.js `^22.19.0` or `>=24.0.0`, pnpm, and a DSH release whose
-published packages are on the `0.1.1-rc.1` compatibility line.
+Requirements: Node.js `>=22.19.0`, pnpm 11, and the DSH `0.2.0-rc.2` package
+line (the official desktop application ships it).
 
 ```sh
-pnpm install
+pnpm install --ignore-scripts
 pnpm typecheck
 pnpm test
 pnpm build
 pnpm pack:check
 ```
 
-All tests use local mocks. They do not call FHL or another paid service.
+All tests use local mocks. They do not call FHL or another paid service. The
+package has no install-time build script, so the published `.tgz` never requires
+a build authorization.
 
 ## API Defaults
 
@@ -282,17 +259,12 @@ startup and does not retry a completed successful image request.
 
 ## Scope And Limitations
 
-- The first standalone release is a Host/Cordis bundle and does not ship a
-  custom DSH settings-card UI.
-- API key configuration is model-mediated chat configuration plus environment
-  or host-credential fallback.
+- This is a Host/Cordis bundle and does not ship a custom DSH settings-card UI;
+  per-profile configuration goes through a patch layer.
+- API key configuration is model-mediated chat configuration, or a direct write
+  into the DSH credential store.
 - The plugin does not download or execute arbitrary remote plugins.
-- APIMart workers, nail-try-on presets, and large workflow batch orchestration
-  remain separate follow-up packages; the core generation/edit contract is
-  kept portable for DSH users.
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-Chinese user documentation is in the [中文区](#fhl-zh), with detailed [installation](docs/INSTALL.zh-CN.md), [chat configuration](docs/CONFIGURATION.zh-CN.md), [troubleshooting](docs/TROUBLESHOOTING.zh-CN.md), and [security](docs/SECURITY.zh-CN.md) guides.

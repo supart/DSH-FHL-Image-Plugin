@@ -7,73 +7,36 @@
 `DSH FHL Image` 是 **DeepSeek Harness 的插件**，不是完整的 DSH 软件，也不能
 双击 `.tgz` 文件直接运行。你需要先安装并能启动 DSH，再安装本插件。
 
+本版本 `0.2.1` 对应**官方桌面版 DSH `0.2.0-rc.2` 包线**；旧 `0.1.x` 插件
+不能装在 0.2 桌面版上，装了会被版本检查拒绝。
+
 ## 推荐下载
 
 在 GitHub Release 页面下载：
 
 ```text
-DSH-FHL-Image-Plugin-0.1.0-Windows-User-Bundle.zip
+fhl-plugins-dsh-fhl-image-0.2.1.tgz
 ```
 
-解压后，你会看到：
+这是插件包，不要双击。
 
-- `dsh-fhl-image-plugin-0.1.0.tgz`：插件包，不要双击。
-- `install-fhl-image-plugin.cmd`：Windows 安装入口，直接双击即可。
-- `README-FIRST.zh-CN.md`：本说明。
-- `docs/`：详细安装、聊天配置和安全说明。
+## 在官方桌面 App 里安装
 
-## 使用前准备
+1. 打开桌面 App，进入侧边栏「插件」页面。
+2. 选择安装，填入 tarball 的**绝对路径**（建议先把文件放到不含空格的目录，
+   例如 `~/Downloads/`）。
+3. 安装完成后，在插件列表里打开 `@fhl-plugins/dsh-fhl-image` 的启用开关。
+4. **完全退出并重新打开 App**。
+5. 新建会话，确认工具列表里有：
 
-1. 安装 DeepSeek Harness（`dsh`），并确认在 PowerShell 中能运行：
+   - `fhl_image_configure`
+   - `fhl_image_generate`
+   - `fhl_image_edit`
 
-   ```powershell
-   dsh --help
-   ```
+也可以直接在会话里让 Agent 帮你安装这个本地 tarball。注意 `desktop` profile
+由桌面 App 独占管理，不要从外部终端对它执行 `dsh plugin`。
 
-2. 准备 Node.js 22.19+ 或 Node.js 24+。
-3. 准备 pnpm，并确认：
-
-   ```powershell
-   pnpm --version
-   ```
-
-如果你已经在使用 DSH Desktop 或本机 DSH 开发预览版，可以直接进入下一步。
-
-## 安装插件
-
-1. 解压 `DSH-FHL-Image-Plugin-0.1.0-Windows-User-Bundle.zip`。
-2. 双击解压目录根部的 `install-fhl-image-plugin.cmd`。
-3. 如果 Windows 阻止脚本，右键该文件所在文件夹，选择“在终端中打开”，运行：
-
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 `
-     -Profile fhl-image -TarballPath .\dsh-fhl-image-plugin-0.1.0.tgz
-   ```
-
-4. 安装结束后检查：
-
-   ```powershell
-   dsh --profile fhl-image --dump-config
-   ```
-
-看到下面两项才算安装成功：
-
-- `@fhl-plugins/dsh-fhl-image`
-- `fhl-image` bundle
-
-## 启动 DSH
-
-完全关闭旧的 DSH 窗口后运行：
-
-```powershell
-dsh --profile fhl-image
-```
-
-打开 DSH 页面，新建会话，并确认工具列表中有：
-
-- `fhl_image_configure`
-- `fhl_image_generate`
-- `fhl_image_edit`
+完整判据、升级与卸载见 [安装说明](docs/INSTALL.zh-CN.md)。
 
 ## 在聊天窗口配置生图 API
 
@@ -83,11 +46,12 @@ dsh --profile fhl-image
 我想配置 FHL 生图专用 API。请使用 fhl_image_configure 工具，并先告诉我需要如何提供一个或多个 Worker Key；不要调用生图工具。
 ```
 
-Agent 询问后，再把一个或多个 Worker Key 粘贴到 DSH 聊天框。多个 Key 一行一个。
+Agent 询问后，再把一个或多个 Worker Key 粘贴到聊天框。多个 Key 一行一个。
 配置阶段只应看到 `fhl_image_configure`，不应调用生图工具。
 
 重要：聊天配置会让 Key 随消息经过当前模型，并可能保留在 DSH 会话历史中。不能
-接受这条链路的 Key，请改用 DSH 宿主凭据或环境变量方式。
+接受这条链路的 Key，请改用 DSH 自身的凭据机制直接写入对应引用名
+（`FHL_IMAGE_API_KEY` 等）；`apiKeyEnv` 只是引用名前缀，不是环境变量。
 
 ## 第一次生图
 
@@ -105,17 +69,17 @@ Agent 询问后，再把一个或多个 Worker Key 粘贴到 DSH 聊天框。多
 
 ## 看到“没有工具”怎么办
 
-1. 完全关闭旧 DSH Host。
-2. 确认启动的是 `fhl-image` profile。
-3. 重新运行：
+1. 在「插件」页面确认插件已安装且已启用。
+2. 完全退出桌面 App 再重新打开（命令行版则停止旧 Host 后重启同一 profile）。
+3. 新建会话，再检查三个工具。
 
-   ```powershell
-   dsh --profile fhl-image
-   ```
+不要在旧会话里继续测试；旧进程可能仍在用旧工具目录。
 
-4. 刷新浏览器并新建会话。
+## 安装被拒绝怎么办
 
-不要在旧窗口继续测试；旧 Host 可能还在使用旧工具目录。
+如果看到 `incompatible-version`，说明插件版本与当前 DSH 运行时不匹配。请换用与
+当前 DSH 对应的插件版本，**不要**授予版本豁免——豁免会让不兼容的插件真的加载。
+参考 [故障排查](docs/TROUBLESHOOTING.zh-CN.md)。
 
 ## 不要做的事
 
@@ -126,7 +90,7 @@ Agent 询问后，再把一个或多个 Worker Key 粘贴到 DSH 聊天框。多
 
 详细说明：
 
-- [Windows 安装说明](docs/INSTALL.zh-CN.md)
+- [安装说明（桌面 App 与命令行版）](docs/INSTALL.zh-CN.md)
 - [聊天配置 API](docs/CONFIGURATION.zh-CN.md)
 - [故障排查](docs/TROUBLESHOOTING.zh-CN.md)
 - [安全边界](docs/SECURITY.zh-CN.md)

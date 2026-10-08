@@ -1,73 +1,95 @@
-# Windows 安装说明
+# 安装说明（官方桌面 App 与命令行版）
 
-本文面向第一次安装 DSH 插件的用户。命令默认在 Windows PowerShell 中执行。
-本插件不是完整 DSH 软件；如果你还没有 DSH，请先安装 DSH，再回到本文。
+本插件不是完整 DSH 软件。请先安装并能启动 DeepSeek Harness，再安装本插件。
 
-## 1. 准备文件
+版本对应关系：
 
-需要以下内容：
+| 插件版本 | 目标 DSH |
+| --- | --- |
+| `0.2.1` | 官方桌面版 `0.2.0-rc.2` 包线（DSH 0.2） |
+| `0.1.0` | 旧 `0.1.1-rc.1` 包线，**已不再支持** |
 
-- DSH 已安装并能运行 `dsh --help`。
-- Node.js 22.19+ 或 Node.js 24+。
-- pnpm（仅源码开发需要；安装预构建包时不需要自己编译）。
-- `dsh-fhl-image-plugin-0.1.0.tgz` 预构建包。
-- 本项目中的 `scripts/install-to-dsh.ps1`。
+安装包文件名：`fhl-plugins-dsh-fhl-image-0.2.1.tgz`（从 Release 下载，或本项目
+`pnpm build && pnpm pack` 后在 `artifacts/` 生成）。不要双击 `.tgz`。
 
-最省事的方式是下载 Release 中的
-`DSH-FHL-Image-Plugin-0.1.0-Windows-User-Bundle.zip`。解压后会同时得到 tarball、
-安装脚本和中文快速开始说明；不要双击 `.tgz`。
+---
 
-将 tarball 放入项目的 `artifacts` 目录（推荐）、项目根目录或 `scripts` 目录，
-辅助脚本都会自动查找；也可以通过 `-TarballPath` 明确指定文件。
-不要把用户数据、会话目录或凭据文件复制到插件项目。
+## 1. 官方桌面 App 安装（推荐）
 
-## 2. 为什么推荐辅助脚本
+适用于 macOS 与 Windows 的官方桌面版。桌面 App 拥有自己托管的 `desktop`
+profile，插件必须通过 App 自身的插件管理安装。
 
-Windows 版 DSH CLI 当前通过 `shell:true` 转发 `dsh plugin` 的参数。项目路径
-如果包含空格，绝对 tarball 路径可能在到达 pnpm 前被拆成多个参数。这是上游
-CLI 的参数转发问题，不是插件构建失败。
+### 1.1 准备
 
-项目辅助脚本会：
+- 已安装并能启动官方桌面 App。
+- 已把 `fhl-plugins-dsh-fhl-image-0.2.1.tgz` 放在**不含空格**的本地目录
+  （例如 `~/Downloads/`、`~/.dsh/plugins/`）。路径含空格或中文可能导致安装失败。
 
-1. 找到 `artifacts` 中最新的 `.tgz`。
-2. 将 tarball 临时复制到系统临时目录。
-3. 调用 DSH 安装命令。
-4. 无论成功或失败都删除临时文件。
+### 1.2 方式 A：图形界面安装
 
-脚本不复制用户数据、凭据或 API Key，也不会调用模型或图片 API。
+1. 打开 App，进入侧边栏的「插件」页面。
+2. 选择安装，填入 tarball 的**绝对路径**，或填写包名 / tarball URL / git 源。
+3. 等待安装完成；若出现构建脚本授权提示，确认是否放行（本插件预构建，通常不会有）。
+4. 在插件列表中找到 `@fhl-plugins/dsh-fhl-image`，打开启用开关。
+5. **完全退出并重新打开 App**（bundle 层列表在启动时组装）。
 
-## 3. 推荐安装
+### 1.3 方式 B：让 Agent 安装
 
-在本项目根目录运行：
+在桌面 App 的会话里直接要求安装这个 tarball；Agent 会用插件管理工具安装：
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 -Profile fhl-image
+```text
+请用插件管理工具安装本地的 FHL 图像插件包：
+/绝对路径/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+安装完成后告诉我它是否已启用。
 ```
 
-需要明确指定包时：
+安装动作需要 `danger-full-access` 权限或当次授权；安装会改写当前 profile 的
+`package.json`、`pnpm-lock.yaml` 与 `node_modules/`。
+
+### 1.4 验证成功
+
+同时满足以下条件才算安装完成：
+
+- 插件卡片显示已安装、已启用，没有报错标签。
+- `~/.dsh/profiles/desktop/package.json` 的 `dsh.profile.bundles` 中出现
+  `@fhl-plugins/dsh-fhl-image`，且原有条目（`@deepseek-ai/dsh-base`、
+  `@deepseek-ai/dsh-web-app`、`dsh-orb`）顺序不变。
+- `~/.dsh/profiles/desktop/node_modules/@fhl-plugins/dsh-fhl-image/` 存在。
+- 新会话的工具列表出现 `fhl_image_configure`、`fhl_image_generate`、
+  `fhl_image_edit`。
+- 安装日志 `~/.dsh/profiles/desktop/.plugin-manager/logs/<操作>/pnpm.log` 无错误。
+- 安装过程没有真实 FHL 请求，也没有产生图片费用。
+
+### 1.5 关于不兼容报错
+
+如果安装或启动报 `incompatible-version`，说明插件的
+`peerDependencies`（`@deepseek-ai/dsh*`）与当前 DSH 运行时不匹配。**正确做法是
+换用与当前 DSH 版本对应的插件版本**，而不是授予版本豁免：豁免会让不兼容的插件
+真的跑起来，可能崩溃或损坏数据。桌面 App 的插件管理器提供的版本豁免只应在你
+明确接受风险时使用。
+
+---
+
+## 2. 命令行版 DSH 安装（进阶）
+
+如果你用的是命令行/自托管 DSH 而不是官方桌面 App：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 `
-  -Profile fhl-image -TarballPath .\dsh-fhl-image-plugin-0.1.0.tgz
+dsh plugin --profile fhl-image add .\artifacts\fhl-plugins-dsh-fhl-image-0.2.1.tgz
 ```
 
-默认使用 `--ignore-scripts` 安装预构建包，因此不会因为安装包的 `prepare`
-脚本要求构建授权而中断。需要从源码构建时，再按开发者说明操作。
-
-## 4. 安装后检查
-
-先不要打开旧的 DSH 窗口，执行：
+路径必须是**绝对路径**且不含空格时最稳。安装后检查：
 
 ```powershell
 dsh --profile fhl-image --dump-config
 ```
 
-检查结果中至少应看到：
+输出中至少应看到：
 
-- `@fhl-plugins/dsh-fhl-image`。
-- `fhl-image` bundle 层。
-- `baseURL`、`apiKeyEnv`、超时和 Worker 冷却设置。
-- 不出现任何 API Key 内容。
+- `@fhl-plugins/dsh-fhl-image`
+- `fhl-image` bundle 层
+- `baseURL`、`apiKeyEnv`、超时与 Worker 冷却设置
+- 不出现任何 API Key 内容
 
 然后启动同一个 profile：
 
@@ -75,28 +97,43 @@ dsh --profile fhl-image --dump-config
 dsh --profile fhl-image
 ```
 
-如果当前 DSH 安装使用 Web 子命令，也可以使用对应的 `dsh web` 入口，但必须
-确保它加载的是 `fhl-image` profile，而不是旧 profile。
+注意：`--profile desktop` 被官方独占管理，从外部 shell 直接执行
+`dsh plugin --profile desktop ...` 会被拒绝；桌面 App 的插件只能按第 1 节安装。
 
-## 5. 不含空格路径的直接命令
+本插件的安装包是预构建产物，不需要在安装时编译，也没有会要求构建授权的安装脚本。
 
-如果 tarball 的完整路径不含空格，可直接执行：
+## 3. Windows 命令行辅助脚本
+
+Windows 下 `dsh plugin` 的参数转发经过 `shell:true`，路径含空格时绝对路径可能被
+拆成多个参数。项目提供辅助脚本规避该问题：
 
 ```powershell
-dsh plugin --profile fhl-image add .\artifacts\dsh-fhl-image-plugin-0.1.0.tgz
+powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 -Profile fhl-image
 ```
 
-路径含空格时仍建议使用辅助脚本。
+脚本会：在 `artifacts/`、项目根目录、`scripts/` 中查找最新的 `.tgz`；把 tarball
+复制到系统临时目录后调用 DSH 安装命令；无论成功失败都清理临时文件。脚本不复制
+用户数据、凭据或 API Key，也不会调用模型或图片 API。
 
-## 6. 安装完成的定义
+需要明确指定包时：
 
-只有同时满足以下条件，才算安装完成：
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 `
+  -Profile fhl-image -TarballPath .\artifacts\fhl-plugins-dsh-fhl-image-0.2.1.tgz
+```
 
-- `--dump-config` 显示插件包和 `fhl-image` bundle。
-- 重启 Host 后仍能看到同一 bundle。
-- 新会话的工具目录出现 `fhl_image_configure`、`fhl_image_generate` 和
-  `fhl_image_edit`。
-- 安装过程没有真实 FHL 请求，也没有产生图片费用。
+## 4. 升级与卸载
 
-如果工具目录没有更新，先完全停止旧 Host，再重新启动并刷新浏览器；详见
+- **桌面 App**：在「插件」页面**先卸载/移除**旧版本，再按第 1 节安装新 tarball，
+  然后完全退出并重开 App。
+- **命令行版**：用同样的 `dsh plugin --profile <profile> add <新 tarball>` 覆盖安装，
+  或先 `remove` 再 `add`。
+
+注意：如果包名和版本号都没变（例如只是重新打包了同一个 `0.2.1`），桌面版插件
+管理器会报 `ambiguous-install`（安装命令本身成功，但管理器无法判断哪个依赖发生
+了变化）。正确做法是先卸载再安装；发布新版时请提升版本号。
+
+升级前请确认新插件版本的目标 DSH 线与你正在运行的 DSH 一致（见本文开头的对照表）。
+
+如果安装后工具目录没有出现三个工具，先完全退出再重新启动并新建会话；详见
 [故障排查](TROUBLESHOOTING.zh-CN.md)。

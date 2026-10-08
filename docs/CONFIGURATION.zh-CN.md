@@ -4,16 +4,17 @@
 
 `fhl_image_configure` 只应在用户明确要求配置 API 时调用。聊天配置的原始
 Key 会随用户消息经过当前 DSH 模型，并可能保留在会话历史中。它适合用户明确
-接受这条链路的 Worker Key；不能经过模型服务的高敏感凭据，应改用宿主凭据机制
-或环境变量。
+接受这条链路的 Worker Key；不能经过模型服务的高敏感凭据，应改用 DSH 自身的
+凭据机制直接写入（见本文最后一节）。官方桌面 App 与命令行版在这条链路上行为
+相同。
 
 不要把 Key 发给 Codex 主对话、GitHub、截图、日志、Issue 或诊断导出。本文和
 项目记录不保存任何真实 Key。
 
 ## 实际流程
 
-1. 启动已安装插件的 `fhl-image` profile。
-2. 新建 DSH 会话。
+1. 打开已安装本插件的官方桌面 App（命令行版则启动 `fhl-image` profile）。
+2. 新建会话。
 3. 先确认工具目录包含：
 
    - `fhl_image_configure`
@@ -50,7 +51,7 @@ Key 会随用户消息经过当前 DSH 模型，并可能保留在会话历史�
 - 本轮没有调用 `fhl_image_generate` 或 `fhl_image_edit`。
 - 结果只显示配置数量、跳过数量或 `[configured]` 状态。
 - credential provider 对对应 Worker 槽位返回 `configured=true`。
-- 完全重启同一个 `fhl-image` profile 后，配置状态仍然存在。
+- 完全退出并重新打开桌面 App（命令行版则重启同一 profile）后，配置状态仍然存在。
 - 没有发起图片请求，也没有产生图片 API 费用。
 
 2026-08-21，用户已在本机 DSH 聊天窗口确认 FHL Worker API 配置成功。当前脱敏
@@ -80,11 +81,35 @@ Key 的同一轮意外发起图片请求。
 
 ## 不希望 Key 经过模型时
 
-改用 DSH 宿主凭据机制或环境变量：
+Key 只存放在 DSH 凭据服务里，由插件通过凭据引用名读取；**不是环境变量**。
+插件配置项 `apiKeyEnv` 只是这些引用名的前缀：
 
 ```text
-FHL_IMAGE_API_KEY=your-key
-FHL_IMAGE_API_KEY_2=another-key
+FHL_IMAGE_API_KEY      第 1 个 Worker
+FHL_IMAGE_API_KEY_2    第 2 个 Worker
+...
+FHL_IMAGE_API_KEY_10   第 10 个 Worker
 ```
 
-环境变量示例只用于说明变量名，不要把真实值提交到 Git 或写入文档。
+因此，若你不希望 Key 经过模型，应改用 DSH 自身的凭据机制把对应引用名直接写入
+凭据服务，而不是走聊天配置；命令行版与桌面版都适用。上文示例只说明引用名，
+不要把真实值提交到 Git 或写入文档。
+
+## 覆盖插件配置（baseURL、超时、Worker 冷却）
+
+插件的 bundle 层自带一组确定性默认值（不读取环境变量）。需要改动时，在
+**profile 补丁层**覆盖即可，桌面版与命令行版通用：
+
+```yaml
+# ~/.dsh/profiles/desktop/cordis.patch.yml
+- id: fhl-image
+  name: '@fhl-plugins/dsh-fhl-image'
+  config:
+    baseURL: https://www.fhl.mom
+    apiKeyEnv: FHL_IMAGE_API_KEY
+    timeoutMs: 180000
+    workerCooldownMs: 60000
+```
+
+改完后完全退出并重新打开 App（或重启对应 profile）生效。需要机器级覆盖时，
+DSH 还支持 `~/.dsh/cordis.patch.yml`，它的优先级高于单个 profile 的补丁层。

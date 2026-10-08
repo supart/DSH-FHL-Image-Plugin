@@ -1,8 +1,13 @@
 import { credentialRef, type CredentialProvider } from '@deepseek-ai/dsh-credentials'
 import { FhlImagesError } from './client.js'
+import { MAX_FHL_IMAGE_WORKERS } from './types.js'
 
-/** The maximum number of independent image workers supported by the product. */
-export const MAX_FHL_IMAGE_WORKERS = 10
+/**
+ * The maximum number of independent image workers supported by the product.
+ * Re-exported from the shared limit table so the credential tool and the pool
+ * can never disagree about how many slots exist.
+ */
+export { MAX_FHL_IMAGE_WORKERS }
 export const DEFAULT_FHL_IMAGE_WORKER_COOLDOWN_MS = 60_000
 
 export interface FhlImageWorker {
@@ -43,7 +48,15 @@ export class FhlImageWorkersError extends Error {
   }
 }
 
-function safeWorkerErrorMessage(error: unknown): string {
+/**
+ * Bound and scrub an upstream failure message before it can reach a tool
+ * result. `client.ts` already removes the key it used for a request, but this
+ * is the last hop before the message is returned to the model, so it also
+ * removes every key known to this pool: a third-party fetch/undici error can
+ * echo the outgoing `Authorization` value in a form the client's own scrubber
+ * never saw.
+ */
+function safeWorkerErrorMessage(error: unknown, secrets: readonly string[] = []): string {
   const message = error instanceof Error
     ? error.message
     : typeof error === 'object' && error !== null && typeof (error as { message?: unknown }).message === 'string'
@@ -51,7 +64,12 @@ function safeWorkerErrorMessage(error: unknown): string {
       : typeof error === 'string'
         ? error
         : 'Unknown FHL Images API failure'
-  return message.replace(/Bearer\s+[^\s]+/gi, 'Bearer [redacted]').replace(/\s+/g, ' ').trim().slice(0, 512)
+  let scrubbed = message
+  for (const secret of secrets) {
+    // `replaceAll('')` would splice the replacement between every character.
+    if (secret.length > 0) scrubbed = scrubbed.replaceAll(secret, '[redacted]')
+  }
+  return scrubbed.replace(/Bearer\s+[^\s]+/gi, 'Bearer [redacted]').replace(/\s+/g, ' ').trim().slice(0, 512)
 }
 
 export function workerCredentialRefs(apiKeyEnv: string): readonly string[] {
@@ -72,6 +90,9 @@ function isRetryableStatus(status: number | undefined): boolean {
 export function classifyWorkerError(error: unknown, signal: AbortSignal): 'retryable' | 'worker-fatal' | 'task-fatal' | 'cancelled' {
   if (signal.aborted) return 'cancelled'
   if (!isFhlError(error)) return 'task-fatal'
+  // Deterministic outcomes: another worker cannot change them, so spending the
+  // rest of the pool on a retry would only repeat the same failure.
+  if (error.code === 'invalid-request' || error.code === 'response-too-large') return 'task-fatal'
   if (error.code === 'aborted' || error.code === 'request' || error.code === 'invalid-json' || error.code === 'invalid-image') return 'retryable'
   if (error.code === 'http') {
     if (error.status === 401 || error.status === 403) return 'worker-fatal'
@@ -79,6 +100,22 @@ export function classifyWorkerError(error: unknown, signal: AbortSignal): 'retry
     return 'task-fatal'
   }
   return 'task-fatal'
+}
+
+/**
+ * Scrub an error that is about to be rethrown verbatim. Returns the original
+ * object when nothing changed, so callers keep the exact error type, `code` and
+ * `status` that classification and cancellation semantics depend on.
+ */
+function scrubThrownError<T>(error: T, secrets: readonly string[]): T {
+  if (error instanceof FhlImagesError) return error
+  const raw = error instanceof Error ? error.message : typeof error === 'string' ? error : undefined
+  if (raw === undefined) return error
+  let scrubbed = raw
+  for (const secret of secrets) {
+    if (secret.length > 0) scrubbed = scrubbed.replaceAll(secret, '[redacted]')
+  }
+  return (scrubbed === raw ? error : new Error(scrubbed)) as T
 }
 
 function abortError(): FhlImagesError {
@@ -177,14 +214,18 @@ export class FhlImageWorkerPool {
         return await operation(lease.worker, index)
       } catch (error) {
         const disposition = classifyWorkerError(error, signal)
-        if (disposition === 'cancelled' || disposition === 'task-fatal') throw error
+        // This path rethrows the original error to the caller, so it is the one
+        // place a raw third-party message could still carry a worker key.
+        if (disposition === 'cancelled' || disposition === 'task-fatal') {
+          throw scrubThrownError(error, workers.map(worker => worker.apiKey))
+        }
         const health = this.health.get(lease.worker.ref) ?? { disabled: false, cooldownUntil: 0 }
         if (disposition === 'worker-fatal') health.disabled = true
         else health.cooldownUntil = this.now() + this.cooldownMs
         this.health.set(lease.worker.ref, health)
         excluded.add(lease.worker.ref)
         if (workers.every(worker => excluded.has(worker.ref) || this.health.get(worker.ref)?.disabled === true)) {
-          throw new FhlImageWorkersError(`All configured FHL image workers failed for this task. Last error: ${safeWorkerErrorMessage(error)}`)
+          throw new FhlImageWorkersError(`All configured FHL image workers failed for this task. Last error: ${safeWorkerErrorMessage(error, workers.map(worker => worker.apiKey))}`)
         }
       } finally {
         lease.release()

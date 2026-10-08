@@ -1,0 +1,15 @@
+{
+  // `tsconfig.json` describes the *build*: it roots at `src` and emits to
+  // `lib/types`. That meant no test file was ever typechecked, so a spec could
+  // reference a renamed or removed export and still run, because Vitest strips
+  // types instead of checking them. This project checks `src` and `tests`
+  // together and emits nothing.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}

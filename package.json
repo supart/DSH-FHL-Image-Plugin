@@ -1,6 +1,6 @@
 {
   "name": "@fhl-plugins/dsh-fhl-image",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Independent DeepSeek Harness bundle for FHL Images generation, editing, worker pools, and chat-configured credentials.",
   "type": "module",
   "license": "MIT",
@@ -8,6 +8,13 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/supart/DSH-FHL-Image-Plugin"
+  },
+  "homepage": "https://github.com/supart/DSH-FHL-Image-Plugin#readme",
+  "bugs": {
+    "url": "https://github.com/supart/DSH-FHL-Image-Plugin/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "deepseek-harness",
@@ -33,6 +40,12 @@
   "files": [
     "lib",
     "cordis.patch.yml",
+    "docs/INSTALL.zh-CN.md",
+    "docs/CONFIGURATION.zh-CN.md",
+    "docs/TROUBLESHOOTING.zh-CN.md",
+    "docs/SECURITY.zh-CN.md",
+    "docs/DEVELOPMENT.zh-CN.md",
+    "docs/RELEASE_NOTES.zh-CN.md",
     "docs/assets",
     "README-FIRST.zh-CN.md",
     "README.md",
@@ -40,6 +53,10 @@
     "LICENSE",
     "CHANGELOG.md"
   ],
+  "engines": {
+    "node": ">=22.19.0",
+    "dsh": ">=0.2.0-rc.2 <0.3.0-0"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -47,35 +64,37 @@
   },
   "scripts": {
     "build": "tsc --pretty false && tsdown",
-    "prepare": "pnpm run build",
-    "typecheck": "tsc --noEmit --pretty false",
+    "pretest": "tsc --pretty false && tsdown",
+    "typecheck": "tsc -p tsconfig.test.json --pretty false",
     "test": "vitest run",
     "pack:check": "pnpm pack --pack-destination artifacts"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-agent": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-attachment": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-credentials": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-invariants": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-llm": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-system-prompt": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-tools": "^0.1.1-rc.1",
-    "@deepseek-ai/schemastery": "^3.18.1"
+    "@deepseek-ai/cordis": "~4.0.4",
+    "@deepseek-ai/dsh-attachment": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-credentials": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-invariants": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-llm": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-session": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-tools": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/schemastery": "~3.18.4"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/cordis-plugin-include": "1.0.6",
-    "@deepseek-ai/cordis-plugin-loader": "1.0.2",
-    "@deepseek-ai/dsh-agent": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-attachment": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-credentials": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-invariants": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-llm": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-system-prompt": "^0.1.1-rc.1",
-    "@deepseek-ai/dsh-tools": "^0.1.1-rc.1",
-    "@deepseek-ai/schemastery": "^3.18.1",
+    "@deepseek-ai/cordis": "4.0.4",
+    "@deepseek-ai/cordis-plugin-include": "1.0.9",
+    "@deepseek-ai/cordis-plugin-loader": "1.0.5",
+    "@deepseek-ai/dsh-attachment": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-credentials": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-invariants": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-session": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-tools": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "3.18.4",
     "@types/node": "^22.20.0",
+    "@types/semver": "^7.8.0",
+    "semver": "^7.7.2",
     "tsdown": "^0.22.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"

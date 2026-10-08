@@ -1,0 +1,19 @@
+# Normalize every text file to LF in the repository, regardless of the
+# contributor's operating system or `core.autocrlf` setting. The published
+# tarball is built from the working tree, so a predictable checkout keeps the
+# packed artifact reproducible across macOS, Linux and Windows.
+* text=auto eol=lf
+
+# Explicitly binary assets: never apply end-of-line or diff conversion.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.tgz binary
+*.woff binary
+*.woff2 binary
+
+# Keep generated/derived files out of language statistics and diff review.
+pnpm-lock.yaml -diff linguist-generated

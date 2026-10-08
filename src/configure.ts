@@ -1,6 +1,8 @@
 import { credentialRef, type CredentialProvider } from '@deepseek-ai/dsh-credentials'
+import { MAX_FHL_IMAGE_WORKERS } from './types.js'
 
-export const MAX_CONFIGURED_WORKERS = 10
+/** Kept for callers that used the 0.2.0 name; the value now lives in one place. */
+export { MAX_FHL_IMAGE_WORKERS as MAX_CONFIGURED_WORKERS }
 
 export interface ConfigureWorkersRequest {
   readonly keys: readonly string[]
@@ -42,12 +44,24 @@ function normalizeKeys(keys: readonly string[]): string[] {
   return result
 }
 
-/** Store chat-supplied worker keys and return only masked state. */
+/**
+ * Store chat-supplied worker keys and return only masked state.
+ *
+ * Configuration is a *replacement*, not a merge: slots above the supplied key
+ * count are cleared. 0.2.0 could only write, never remove, so configuring one
+ * key after ten left nine revoked keys live and still scheduled against, while
+ * the result claimed only one worker was configured.
+ *
+ * A provider may refuse to unset a reference the launching environment
+ * supplies read-only; that refusal is tolerated because such a value outranks
+ * anything stored here anyway, and it must not fail the keys that were stored.
+ */
 export async function configureWorkers(
-  credentials: Pick<CredentialProvider, 'set'>,
+  credentials: Pick<CredentialProvider, 'set' | 'unset'>,
   request: ConfigureWorkersRequest,
 ): Promise<ConfigureWorkersResult> {
-  const keys = normalizeKeys(request.keys).slice(0, MAX_CONFIGURED_WORKERS)
+  const supplied = request.keys.filter(value => value.trim().length > 0).length
+  const keys = normalizeKeys(request.keys).slice(0, MAX_FHL_IMAGE_WORKERS)
   const workers: ConfiguredWorkerSummary[] = []
   for (const [index, key] of keys.entries()) {
     const slot = index + 1
@@ -61,9 +75,18 @@ export async function configureWorkers(
     }
     workers.push({ slot, ref, configured: true, preview: previewKey(key) })
   }
+  for (let slot = keys.length + 1; slot <= MAX_FHL_IMAGE_WORKERS; slot += 1) {
+    try {
+      await credentials.unset(credentialRef(workerRef(request.apiKeyEnv, slot)))
+    } catch {
+      // See the doc comment: environment-supplied references are not ours to remove.
+    }
+  }
   return {
     configured: workers.length,
-    skipped: Math.max(0, normalizeKeys(request.keys).length - workers.length),
+    // Duplicates collapse in `normalizeKeys`, so this counts both the
+    // repeated keys and the ones beyond the ten-slot ceiling.
+    skipped: Math.max(0, supplied - workers.length),
     workers,
   }
 }

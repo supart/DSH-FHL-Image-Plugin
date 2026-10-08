@@ -1,0 +1,121 @@
+name: CI
+
+# The repository shipped for a long time without any automated gate: the
+# offline typecheck/test/build/pack sequence was only ever run by hand on the
+# maintainer's machine. Every push and pull request now re-runs that same
+# sequence on a clean checkout, so a broken tree cannot reach `main` unnoticed.
+#
+# The matrix deliberately includes the Node line the desktop application ships
+# (24.x) and the minimum the package declares (22.19+), because the plugin is
+# installed by the desktop runtime and must typecheck and run on both.
+on:
+  push:
+    branches:
+      - main
+      - 'dsh-fhl-image/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.19.0', '24']
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install the pnpm version bundled with the desktop runtime
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Set up Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies from the committed lockfile
+        # No lifecycle scripts: installation must never require a build
+        # authorization, which is the same guarantee the published tarball makes.
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Typecheck against the DSH type surface
+        run: pnpm typecheck
+
+      - name: Run the offline test suite
+        run: pnpm test
+
+      - name: Build the bundle
+        run: pnpm build
+
+      - name: Pack and inspect the release tarball
+        run: |
+          pnpm pack --pack-destination artifacts
+          TGZ="$(ls artifacts/*.tgz)"
+          echo "packed: $TGZ"
+          tar tzf "$TGZ" > /tmp/tarball-contents.txt
+          cat /tmp/tarball-contents.txt
+
+          # The bundle manifest is the only field the desktop plugin manager
+          # requires, so assert the patch file and the entry point actually made
+          # it into the tarball.
+          grep -qx 'package/cordis.patch.yml' /tmp/tarball-contents.txt
+          grep -q 'package/lib/index.js' /tmp/tarball-contents.txt
+
+          # Guard against ever publishing credential material or local machine
+          # paths inside the distributed artifact. Extract first so the binary
+          # assets (PNG screenshots) are never piped into grep.
+          rm -rf /tmp/tarball-scan
+          mkdir -p /tmp/tarball-scan
+          tar xzf "$TGZ" -C /tmp/tarball-scan
+          if grep -rInE 'sk-[A-Za-z0-9]{20,}|/(Users|home)/[A-Za-z0-9._-]+/' \
+               --exclude='*.png' --exclude='*.jpg' --exclude='*.jpeg' --exclude='*.webp' \
+               --exclude='*.tgz' /tmp/tarball-scan; then
+            echo '::error::the packed tarball contains key-like material or an absolute local path'
+            exit 1
+          fi
+          echo 'tarball scan clean'
+
+      - name: Verify every bundled module resolves inside the tarball
+        # The bundler may split shared code into content-hashed chunks rather
+        # than inlining it. A chunk that is not shipped, or an import rewritten
+        # to a path outside the package, would only surface as a load failure on
+        # a user's machine, so resolve the whole relative import graph here.
+        run: |
+          node -e '
+            const { readdirSync, readFileSync, existsSync } = require("node:fs")
+            const { join, resolve, dirname } = require("node:path")
+            const root = "/tmp/tarball-scan/package"
+            const lib = join(root, "lib")
+            const files = readdirSync(lib).filter((name) => name.endsWith(".js") || name.endsWith(".mjs"))
+            const seen = new Set()
+            const missing = []
+            const walk = (file) => {
+              if (seen.has(file)) return
+              seen.add(file)
+              if (!existsSync(file)) { missing.push(file); return }
+              const source = readFileSync(file, "utf8")
+              const pattern = /(?:from|import)\s*\(?\s*["'"'"'](\.[^"'"'"']+)["'"'"']/g
+              for (const match of source.matchAll(pattern)) {
+                walk(resolve(dirname(file), match[1]))
+              }
+            }
+            for (const name of files) walk(join(lib, name))
+            if (missing.length > 0) {
+              console.error("::error::bundled modules are missing from the tarball:", missing)
+              process.exit(1)
+            }
+            console.log(`resolved ${String(seen.size)} bundled modules with no missing chunk`)
+          '

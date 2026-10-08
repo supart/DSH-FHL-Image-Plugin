@@ -8,6 +8,18 @@ export type { CredentialRef }
 
 export type FhlImageSize = string
 
+// Product limits live here so the tool layer (`index.ts`), the API adapter
+// (`client.ts`), the worker pool and the credential tool all read one value.
+// Before 0.2.1 the same numbers were repeated as literals in four files.
+/** The maximum number of independent image workers a user may configure. */
+export const MAX_FHL_IMAGE_WORKERS = 10
+/** The most variations one `fhl_image_generate` call may request. */
+export const MAX_GENERATE_VARIATIONS = 9
+/** The most variations one `fhl_image_edit` call may request. */
+export const MAX_EDIT_VARIATIONS = 4
+/** The most reference images one `fhl_image_edit` call may accept. */
+export const MAX_EDIT_SOURCES = 10
+
 export interface FhlImageSource {
   readonly data: Uint8Array
   readonly mediaType: Extract<ImageMediaType, 'image/png' | 'image/jpeg' | 'image/webp'>

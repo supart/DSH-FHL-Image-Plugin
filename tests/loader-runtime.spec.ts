@@ -27,6 +27,13 @@ class MemoryCredentials extends CredentialProvider {
   }
   set(ref: CredentialRef, value: string): Promise<void> { this.values.set(ref, value); return Promise.resolve() }
   unset(ref: CredentialRef): Promise<void> { this.values.delete(ref); return Promise.resolve() }
+  // The record half of the credential seam has nothing to do with image
+  // workers; it exists only to satisfy the abstract base class.
+  readRecord(): Promise<never> { return Promise.reject(new Error('credential records are not used by this fixture')) }
+  describeRecord(): Promise<never> { return Promise.reject(new Error('credential records are not used by this fixture')) }
+  listRecords(): Promise<never> { return Promise.reject(new Error('credential records are not used by this fixture')) }
+  modifyRecord(): Promise<never> { return Promise.reject(new Error('credential records are not used by this fixture')) }
+  deleteRecord(): Promise<never> { return Promise.reject(new Error('credential records are not used by this fixture')) }
 }
 
 class MemoryAttachments extends AttachmentStore {
