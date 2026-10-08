@@ -21,6 +21,31 @@ the annotated tag `v0.2.1` points at `3b7e6d2`, the Release
 `DSH FHL Image 0.2.1` is the latest with the tarball attached, and CI passed on
 both branches on its first run. `v0.1.0` was neither moved nor force-pushed.
 
+`main` has since moved past the tag with documentation-only commits, so a tarball
+built from `main` is not byte-identical to the released asset and is not
+expected to be. The v0.2.1 asset itself stays valid: the changes are install-guide
+prose plus internal records, and no new release was cut for them.
+
+## How Third Parties Install
+
+The install guide now leads with what actually works, because only two of the
+four source kinds the plugin manager accepts are usable here:
+
+| Prompt gives | `parseInstallSpec()` kind | Usable |
+| --- | --- | --- |
+| `.tgz`-suffixed http(s) link | `tarball` | yes |
+| Absolute local path | `tarball` / `path` | yes |
+| Repository URL, `releases/latest`, `github:owner/repo` | `git` | **no** |
+| `@fhl-plugins/dsh-fhl-image` | `registry` | **no** (not on npm) |
+
+A git source cannot work: the repository does not track build output (`lib/` is
+the first `.gitignore` entry) and the manifest deliberately declares no
+`prepare` script, so the installed `main` would point at a file that does not
+exist. Registry installs fail because the package is unpublished. The documented
+default is therefore a one-prompt install against the `.tgz` release link, with
+the git-source trap called out explicitly in `README.md`,
+`README-FIRST.zh-CN.md` and `docs/INSTALL.zh-CN.md`.
+
 ## Identity
 
 - Package: `@fhl-plugins/dsh-fhl-image`

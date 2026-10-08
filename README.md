@@ -24,18 +24,46 @@
 安装包：`fhl-plugins-dsh-fhl-image-0.2.1.tgz`（Release 附件，或本地
 `pnpm build && pnpm pack` 生成）。`.tgz` 是插件包，**不能双击运行**。
 
+下载直链：
+
+```text
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+```
+
 ### 安装
 
-**官方桌面 App（推荐）**
+**一条提示词安装（推荐）**
 
-1. 进入侧边栏「插件」页面，选择安装，填入 tarball 的绝对路径。
+在自己的 DSH 会话里直接发送下面这段，Agent 会用插件管理工具下载安装：
+
+```text
+请用插件管理工具安装这个 FHL 图像插件包：
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+
+安装完成后打开它的启用开关，然后让我完全退出并重新打开 App。
+之后新建会话，确认工具列表里有 fhl_image_configure、fhl_image_generate、fhl_image_edit。
+```
+
+> ⚠️ **必须用上面这条以 `.tgz` 结尾的下载直链。**
+> 实测插件管理器只把「以 `.tgz` 结尾的 http(s) 直链」「本地绝对路径」「git 源」
+> 「npm 包名」当作可安装来源，而本项目后三种都不可用：
+> 仓库地址或 `.../releases/latest` 会被识别成 **git 源**，但本仓库不含构建产物
+> `lib/`（已被 `.gitignore` 排除）且没有安装期构建脚本，装上去 `main` 指向的文件
+> 不存在，插件无法加载；`@fhl-plugins/dsh-fhl-image` 也未发布到 npm。
+
+安装会改写 `desktop` profile 的 `package.json`、`pnpm-lock.yaml` 与
+`node_modules/`，因此需要 `danger-full-access` 权限或当次授权。
+
+**图形界面手动安装**
+
+1. 把 tarball 放到**不含空格**的目录（如 `~/Downloads/`），进入侧边栏「插件」页面，
+   选择安装并填入它的**绝对路径**。
 2. 安装完成后打开该插件的启用开关。
 3. 完全退出并重新打开 App。
 4. 新建会话，确认工具列表中有 `fhl_image_configure`、`fhl_image_generate`、
    `fhl_image_edit`。
 
-也可以直接在会话里让 Agent 用插件管理工具安装本地 tarball。桌面 App 独占管理
-`desktop` profile，因此不要从外部 shell 对它执行 `dsh plugin`。
+桌面 App 独占管理 `desktop` profile，因此不要从外部 shell 对它执行 `dsh plugin`。
 
 **命令行版 DSH（进阶）**
 
@@ -177,12 +205,39 @@ the plugin version alone — decide whether installation is accepted.
 
 ## Install
 
-**Official desktop application (recommended).** Open the Plugins page in the
-sidebar, install the `.tgz` by absolute path, switch the plugin on, fully quit
-and reopen the application, then start a new session and confirm the three
-tools. The desktop application owns its `desktop` profile, so do not run
-`dsh plugin` against it from an external shell. You can also ask the Agent to
-install a local tarball with the plugin manager tool.
+Download link:
+
+```text
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+```
+
+**One-prompt install (recommended).** Send this in your own DSH session:
+
+```text
+Install this FHL image plugin bundle with the plugin manager tool:
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+
+Then switch it on and tell me to fully quit and reopen the application.
+Afterwards, start a new session and confirm the tool list contains
+fhl_image_configure, fhl_image_generate and fhl_image_edit.
+```
+
+> ⚠️ **Use the `.tgz` download link above.** The plugin manager accepts only a
+> `.tgz`-suffixed http(s) URL, an absolute local path, a git source, or an npm
+> package name — and for this project only the first two work. A repository URL
+> or `.../releases/latest` is parsed as a **git** source, but this repository
+> ships no build output (`lib/` is gitignored) and declares no install-time build
+> script, so `main` would point at a file that does not exist. The package is
+> also not published to npm.
+
+The install rewrites the `desktop` profile's `package.json`, `pnpm-lock.yaml`
+and `node_modules/`, so it needs `danger-full-access` or a per-action approval.
+
+**Manual install via the GUI.** Open the Plugins page in the sidebar, install the
+`.tgz` by absolute path, switch the plugin on, fully quit and reopen the
+application, then start a new session and confirm the three tools. The desktop
+application owns its `desktop` profile, so do not run `dsh plugin` against it
+from an external shell.
 
 **CLI profiles.**
 

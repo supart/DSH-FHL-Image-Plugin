@@ -22,29 +22,56 @@ profile，插件必须通过 App 自身的插件管理安装。
 ### 1.1 准备
 
 - 已安装并能启动官方桌面 App。
-- 已把 `fhl-plugins-dsh-fhl-image-0.2.1.tgz` 放在**不含空格**的本地目录
-  （例如 `~/Downloads/`、`~/.dsh/plugins/`）。路径含空格或中文可能导致安装失败。
+- 下载直链（插件管理器可直接用）：
 
-### 1.2 方式 A：图形界面安装
+  ```text
+  https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+  ```
 
-1. 打开 App，进入侧边栏的「插件」页面。
-2. 选择安装，填入 tarball 的**绝对路径**，或填写包名 / tarball URL / git 源。
-3. 等待安装完成；若出现构建脚本授权提示，确认是否放行（本插件预构建，通常不会有）。
-4. 在插件列表中找到 `@fhl-plugins/dsh-fhl-image`，打开启用开关。
-5. **完全退出并重新打开 App**（bundle 层列表在启动时组装）。
+- 若改为手动安装，请先把 `fhl-plugins-dsh-fhl-image-0.2.1.tgz` 放在**不含空格**
+  的本地目录（例如 `~/Downloads/`、`~/.dsh/plugins/`）。路径含空格或中文可能
+  导致安装失败。
 
-### 1.3 方式 B：让 Agent 安装
+### 1.2 方式 A：一条提示词让 Agent 安装（推荐）
 
-在桌面 App 的会话里直接要求安装这个 tarball；Agent 会用插件管理工具安装：
+在桌面 App 的会话里直接发送：
 
 ```text
-请用插件管理工具安装本地的 FHL 图像插件包：
-/绝对路径/fhl-plugins-dsh-fhl-image-0.2.1.tgz
-安装完成后告诉我它是否已启用。
+请用插件管理工具安装这个 FHL 图像插件包：
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+
+安装完成后打开它的启用开关，然后让我完全退出并重新打开 App。
+之后新建会话，确认工具列表里有 fhl_image_configure、fhl_image_generate、fhl_image_edit。
 ```
+
+也可以把上面那行 URL 换成 tarball 的**本地绝对路径**，效果相同。
+
+#### 可安装来源只有四种，本项目只有两种可用
+
+插件管理器的 `parseInstallSpec()` 只接受下列来源，请在给出提示词前确认：
+
+| 提示词里给的内容 | 判定结果 | 本项目是否可用 |
+| --- | --- | --- |
+| 以 `.tgz` 结尾的 http(s) 直链 | `tarball` | ✅ 可用 |
+| 本地**绝对**路径（文件或目录） | `tarball` / `path` | ✅ 可用 |
+| 仓库地址 / `releases/latest` / `github:owner/repo` | `git` | ❌ **不可用** |
+| `@fhl-plugins/dsh-fhl-image`（包名） | `registry` | ❌ 未发布到 npm |
+
+**为什么 git 源不可用**：本仓库不跟踪构建产物（`.gitignore` 第 1 行即 `lib/`），
+且 `package.json` **没有** `prepare` 安装期构建脚本（0.2.0 起刻意去掉，以免安装时
+要求构建授权）。git 源装下来的包里 `main` 指向的 `lib/index.js` 不存在，插件无法
+加载。**必须使用 `.tgz` 直链或本地 tarball。**
 
 安装动作需要 `danger-full-access` 权限或当次授权；安装会改写当前 profile 的
 `package.json`、`pnpm-lock.yaml` 与 `node_modules/`。
+
+### 1.3 方式 B：图形界面安装
+
+1. 打开 App，进入侧边栏的「插件」页面。
+2. 选择安装，填入 tarball 的**绝对路径**，或粘贴上面那条 `.tgz` 直链。
+3. 等待安装完成；若出现构建脚本授权提示，确认是否放行（本插件预构建，通常不会有）。
+4. 在插件列表中找到 `@fhl-plugins/dsh-fhl-image`，打开启用开关。
+5. **完全退出并重新打开 App**（bundle 层列表在启动时组装）。
 
 ### 1.4 验证成功
 

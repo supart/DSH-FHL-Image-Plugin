@@ -12,15 +12,35 @@
 
 ## 推荐下载
 
-在 GitHub Release 页面下载：
+下载直链（整行复制）：
 
 ```text
-fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
 ```
 
-这是插件包，不要双击。
+文件名是 `fhl-plugins-dsh-fhl-image-0.2.1.tgz`。这是插件包，不要双击。
 
-## 在官方桌面 App 里安装
+> ⚠️ 别把仓库地址或 `.../releases/latest` 交给 Agent —— 那会被识别成 git 源去
+> 克隆，而本仓库不含构建产物 `lib/`，装上也加载不了。必须是上面这条以 `.tgz`
+> 结尾的直链。
+
+## 最省事的装法：发一条提示词
+
+在**你自己的 DSH 会话**里直接发送下面这段，Agent 会自己下载并安装：
+
+```text
+请用插件管理工具安装这个 FHL 图像插件包：
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+
+安装完成后打开它的启用开关，然后让我完全退出并重新打开 App。
+之后新建会话，确认工具列表里有 fhl_image_configure、fhl_image_generate、fhl_image_edit。
+```
+
+安装要改写 profile 文件，DSH 会向你申请授权，同意即可。
+
+## 在官方桌面 App 里手动安装
+
+如果你更想自己点：
 
 1. 打开桌面 App，进入侧边栏「插件」页面。
 2. 选择安装，填入 tarball 的**绝对路径**（建议先把文件放到不含空格的目录，
@@ -33,8 +53,7 @@ fhl-plugins-dsh-fhl-image-0.2.1.tgz
    - `fhl_image_generate`
    - `fhl_image_edit`
 
-也可以直接在会话里让 Agent 帮你安装这个本地 tarball。注意 `desktop` profile
-由桌面 App 独占管理，不要从外部终端对它执行 `dsh plugin`。
+注意 `desktop` profile 由桌面 App 独占管理，不要从外部终端对它执行 `dsh plugin`。
 
 完整判据、升级与卸载见 [安装说明](docs/INSTALL.zh-CN.md)。
 
