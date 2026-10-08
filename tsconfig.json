@@ -12,6 +12,10 @@
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
+    // `src/ui.ts` is the browser half and touches DOM-typed values, so the DOM
+    // library is part of the build: dropping it here would only move the failure
+    // into the client bundle.
+    "lib": ["ES2024", "DOM"],
     "types": ["node"]
   },
   "include": ["src/**/*.ts"]
