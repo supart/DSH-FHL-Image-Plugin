@@ -2,12 +2,12 @@
 
 ## Current Breakpoint
 
-2026-10-08: version `0.2.1` is complete locally on the package line shipped by
-the official DeepSeek Harness desktop application (`0.2.0-rc.2`). It is a
-hardening release on top of the `0.2.0` desktop port: five correctness defects
-were fixed, credential redaction was extended to the last hop, the test suite
-grew from 20 to 71 cases, `tests/` is now typechecked, and GitHub Actions runs
-the whole gate sequence on Node 22.19 and 24.
+2026-10-08: version `0.2.1` is released on the package line shipped by the
+official DeepSeek Harness desktop application (`0.2.0-rc.2`). It is a hardening
+release on top of the `0.2.0` desktop port: eight correctness defects were
+fixed, credential redaction was extended to the last hop, the test suite grew
+from 20 to 71 cases, `tests/` is now typechecked, and GitHub Actions runs the
+whole gate sequence on Node 22.19 and 24.
 
 The verified breakpoint is: offline typecheck/test/build/pack gates, tarball
 safety scan, bundled-module resolution, a replicated `evaluatePluginCompatibility`
@@ -16,8 +16,10 @@ without a version exemption. Both 0.2.0 and 0.2.1 have now carried a **real**
 FHL image request end to end: `fhl_image_generate` returned a 1088x1920 PNG that
 the DSH attachment service persisted, and no key appeared in the tool result.
 
-Remote publication is the remaining step for this batch: push `main` and the
-development branch, tag `v0.2.1`, and create the Release with the tarball asset.
+Publication is complete. `main` and `dsh-fhl-image/0.2.1-development` are pushed,
+the annotated tag `v0.2.1` points at `3b7e6d2`, the Release
+`DSH FHL Image 0.2.1` is the latest with the tarball attached, and CI passed on
+both branches on its first run. `v0.1.0` was neither moved nor force-pushed.
 
 ## Identity
 
