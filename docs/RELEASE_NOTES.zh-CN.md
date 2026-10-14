@@ -105,5 +105,7 @@ DeepSeek 或 FHL 产品。目标仓库为：
   故障排查文档中说明。
 - 没有 Windows 桌面版的实测记录；Windows 相关说明沿用命令行版脚本，待补充。
 - 未提供桌面设置面板（client 插件）；配置覆盖通过 profile 补丁层完成。
-- 已知但本批次未处理：编辑请求的 multipart 字段名为首图 `image`、其余 `image[]`。
-  该形状已由 `tests/client.spec.ts` 固定，改动它属于协议变更，需对真实接口验证。
+- 编辑请求的 multipart 参考图字段已在 0.2.4 统一为重复的 `image`（0.2.3 及更早为
+  首图 `image`、其余 `image[]`）。该字段属于协议变更，**尚未在本插件的真实 FHL
+  接口上复验**，目前只有单元测试覆盖；Codex 插件 0.2.2 已在其真实链路上复验。依据
+  与复验清单见 `docs/changes/2026-10-14-0.2.4-reference-field.md`。

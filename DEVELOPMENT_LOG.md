@@ -43,9 +43,15 @@ release is cut, and the browser row itself has not yet been observed in a
 running desktop application (the client half loads only at startup, so
 acceptance needs a full quit, reopen and new session).
 
+Version `0.2.4` (2026-10-14) changes the multipart reference field naming: every
+reference now rides the repeated `image` field instead of `image` for the first
+and `image[]` for the rest. It is ported from the Codex plugin's `0.2.2` fix,
+which established on the live endpoint that FHL does not merge the two field
+names into one reference array, so the mixed shape dropped every reference after
+the first. This closes the item `0.2.1` recorded as deliberately deferred.
+
 Still open: post-restart implicit-edit persistence is intentionally not claimed;
 Windows desktop verification has no record; the `0.2.2` browser row has no
-observed acceptance record; and the multipart reference field naming (`image`
-for the first reference, `image[]` for the rest) is pinned by a test rather than
-changed, because altering it is a protocol change that needs a live endpoint
-check. Do not rewrite or force-push `v0.1.0`.
+observed acceptance record; and the `0.2.4` reference-field change has not been
+re-verified against the live FHL endpoint from this plugin. Do not rewrite or
+force-push `v0.1.0`.

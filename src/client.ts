@@ -161,9 +161,15 @@ function extractImages(payload: unknown): FhlImageResult[] {
   return results
 }
 
-function formSourceField(index: number): string {
-  return index === 0 ? 'image' : 'image[]'
-}
+// Every reference rides the same `image` field. FHL does not merge `image` and
+// `image[]` into one reference array, so the mixed shape this plugin shipped
+// through 0.2.3 — `image` for the first reference, `image[]` for the rest —
+// dropped the second and later references: their identity contribution never
+// reached the model. Ported from the Codex plugin's 0.2.2 fix, which confirmed
+// on the live endpoint that the repeated field keeps every reference. The
+// diagnostic `mixed` and `array` shapes are not ported, because this plugin has
+// no diagnostic mode to carry them.
+const EDIT_SOURCE_FIELD = 'image'
 
 function withTimeout(signal: AbortSignal | undefined, timeoutMs: number): { signal: AbortSignal; dispose: () => void } {
   const controller = new AbortController()
@@ -267,7 +273,7 @@ export class FhlImagesClient {
     const form = new FormData()
     request.sources.forEach((source, index) => {
       const bytes = source.data.buffer.slice(source.data.byteOffset, source.data.byteOffset + source.data.byteLength) as ArrayBuffer
-      form.append(formSourceField(index), new Blob([bytes], { type: source.mediaType }), source.name ?? `reference-${index + 1}`)
+      form.append(EDIT_SOURCE_FIELD, new Blob([bytes], { type: source.mediaType }), source.name ?? `reference-${index + 1}`)
     })
     form.append('prompt', request.prompt)
     form.append('model', DEFAULT_FHL_IMAGE_MODEL)

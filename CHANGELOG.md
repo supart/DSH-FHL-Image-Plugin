@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.2.4
+
+Every reference image now rides the repeated `image` multipart field. No change
+to the tool surface, the host half, the browser half or the stored credentials,
+so it is a drop-in replacement for `0.2.3`.
+
+### Fixed
+
+- **Multi-reference edits no longer drop every reference after the first.** The
+  edit form named the first reference `image` and every later one `image[]`. FHL
+  does not merge the two field names into one reference array, so the second and
+  later references uploaded but their identity contribution never reached the
+  model: face, glasses, hairstyle and clothing taken from reference 2 were lost
+  in multi-reference composites. Every reference now uses `image`, matching the
+  Codex plugin's `0.2.2` fix, which confirmed the effect on the live endpoint.
+
+### Changed
+
+- `src/client.ts`: the position-dependent `formSourceField(index)` helper is
+  replaced by a single `EDIT_SOURCE_FIELD` constant. The `mixed` and `array`
+  shapes the Codex plugin keeps for `--field-mode` diagnostics are not ported,
+  because this plugin has no diagnostic mode to carry them.
+- `tests/client.spec.ts`: the old mixed-shape pin is inverted, and a new case
+  drives a full `MAX_EDIT_SOURCES` edit to assert one `image` part per reference
+  and no `image[]` key at all.
+
+### Notes
+
+- The change is a protocol change and has **not** been re-verified against the
+  live FHL endpoint from this plugin; coverage here is unit tests only. See
+  `docs/changes/2026-10-14-0.2.4-reference-field.md`.
+
 ## 0.2.3
 
 Adds a diagnostic row and an empty-pool notice. No change to the tool surface,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FhlImagesClient, type FhlImagesError } from '../src/client.ts'
+import { MAX_EDIT_SOURCES } from '../src/types.ts'
 
 const PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC'
 /** A payload whose base64 spelling carries padding, so it can be stripped. */
@@ -162,11 +163,40 @@ describe('FHL Images client', () => {
     expect(form?.get('prompt')).toBe('combine these')
     expect(form?.get('n')).toBe('1')
     expect(form?.get('output_format')).toBe('png')
-    // Pins the shipped wire shape: the first reference uses `image` and the
-    // rest use `image[]`. Any change here is a protocol change and must be
-    // verified against the live endpoint.
-    expect(form?.getAll('image')).toHaveLength(1)
-    expect(form?.getAll('image[]')).toHaveLength(1)
+    // Pins the shipped wire shape: every reference uses the repeated `image`
+    // field. FHL does not merge `image` and `image[]` into one reference array,
+    // so the mixed shape that shipped through 0.2.3 dropped every reference
+    // after the first.
+    expect(form?.getAll('image')).toHaveLength(2)
+    expect(Array.from(form?.keys() ?? [])).not.toContain('image[]')
+  })
+
+  it('labels every reference of a full-size edit with the repeated `image` field', async () => {
+    let request: Request | undefined
+    const client = clientReturning(async (input, init) => {
+      request = new Request(input, init)
+      return okResponse({ data: [{ b64_json: PNG_BASE64 }] })
+    })
+    const sources = Array.from({ length: MAX_EDIT_SOURCES }, (_, index) => ({
+      data: new Uint8Array([index + 1]),
+      mediaType: 'image/png' as const,
+      name: `reference-${index + 1}.png`,
+    }))
+
+    await client.edit({
+      apiKey: 'secret-key-value',
+      prompt: 'combine these',
+      size: '1024x1024',
+      sources,
+    })
+
+    const form = await request?.formData()
+    const keys = Array.from(form?.keys() ?? [])
+    // One `image` part per reference, and no `image[]` part at all: the field
+    // name must not depend on the reference's position.
+    expect(keys.filter((key) => key === 'image')).toHaveLength(MAX_EDIT_SOURCES)
+    expect(keys).not.toContain('image[]')
+    expect(form?.getAll('image')).toHaveLength(MAX_EDIT_SOURCES)
   })
 
   it('refuses an edit without references', async () => {
