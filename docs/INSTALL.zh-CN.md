@@ -6,10 +6,11 @@
 
 | 插件版本 | 目标 DSH |
 | --- | --- |
-| `0.2.1` | 官方桌面版 `0.2.0-rc.2` 包线（DSH 0.2） |
+| `0.2.2` | 官方桌面版 `0.2.0-rc.2` 包线（DSH 0.2） |
+| `0.2.1` | 官方桌面版 `0.2.0-rc.2` 包线（DSH 0.2），旧版本 |
 | `0.1.0` | 旧 `0.1.1-rc.1` 包线，**已不再支持** |
 
-安装包文件名：`fhl-plugins-dsh-fhl-image-0.2.1.tgz`（从 Release 下载，或本项目
+安装包文件名：`fhl-plugins-dsh-fhl-image-0.2.2.tgz`（从 Release 下载，或本项目
 `pnpm build && pnpm pack` 后在 `artifacts/` 生成）。不要双击 `.tgz`。
 
 ---
@@ -25,10 +26,10 @@ profile，插件必须通过 App 自身的插件管理安装。
 - 下载直链（插件管理器可直接用）：
 
   ```text
-  https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+  https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
   ```
 
-- 若改为手动安装，请先把 `fhl-plugins-dsh-fhl-image-0.2.1.tgz` 放在**不含空格**
+- 若改为手动安装，请先把 `fhl-plugins-dsh-fhl-image-0.2.2.tgz` 放在**不含空格**
   的本地目录（例如 `~/Downloads/`、`~/.dsh/plugins/`）。路径含空格或中文可能
   导致安装失败。
 
@@ -38,7 +39,7 @@ profile，插件必须通过 App 自身的插件管理安装。
 
 ```text
 请用插件管理工具安装这个 FHL 图像插件包：
-https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 
 安装完成后打开它的启用开关，然后让我完全退出并重新打开 App。
 之后新建会话，确认工具列表里有 fhl_image_configure、fhl_image_generate、fhl_image_edit。
@@ -102,7 +103,7 @@ https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plug
 如果你用的是命令行/自托管 DSH 而不是官方桌面 App：
 
 ```powershell
-dsh plugin --profile fhl-image add .\artifacts\fhl-plugins-dsh-fhl-image-0.2.1.tgz
+dsh plugin --profile fhl-image add .\artifacts\fhl-plugins-dsh-fhl-image-0.2.2.tgz
 ```
 
 路径必须是**绝对路径**且不含空格时最稳。安装后检查：
@@ -146,7 +147,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 -Profile f
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 `
-  -Profile fhl-image -TarballPath .\artifacts\fhl-plugins-dsh-fhl-image-0.2.1.tgz
+  -Profile fhl-image -TarballPath .\artifacts\fhl-plugins-dsh-fhl-image-0.2.2.tgz
 ```
 
 ## 4. 升级与卸载
@@ -156,7 +157,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 `
 - **命令行版**：用同样的 `dsh plugin --profile <profile> add <新 tarball>` 覆盖安装，
   或先 `remove` 再 `add`。
 
-注意：如果包名和版本号都没变（例如只是重新打包了同一个 `0.2.1`），桌面版插件
+注意：如果包名和版本号都没变（例如只是重新打包了同一个 `0.2.2`），桌面版插件
 管理器会报 `ambiguous-install`（安装命令本身成功，但管理器无法判断哪个依赖发生
 了变化）。正确做法是先卸载再安装；发布新版时请提升版本号。
 

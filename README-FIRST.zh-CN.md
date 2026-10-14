@@ -7,7 +7,7 @@
 `DSH FHL Image` 是 **DeepSeek Harness 的插件**，不是完整的 DSH 软件，也不能
 双击 `.tgz` 文件直接运行。你需要先安装并能启动 DSH，再安装本插件。
 
-本版本 `0.2.1` 对应**官方桌面版 DSH `0.2.0-rc.2` 包线**；旧 `0.1.x` 插件
+本版本 `0.2.2` 对应**官方桌面版 DSH `0.2.0-rc.2` 包线**；旧 `0.1.x` 插件
 不能装在 0.2 桌面版上，装了会被版本检查拒绝。
 
 ## 推荐下载
@@ -15,10 +15,10 @@
 下载直链（整行复制）：
 
 ```text
-https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 ```
 
-文件名是 `fhl-plugins-dsh-fhl-image-0.2.1.tgz`。这是插件包，不要双击。
+文件名是 `fhl-plugins-dsh-fhl-image-0.2.2.tgz`。这是插件包，不要双击。
 
 > ⚠️ 别把仓库地址或 `.../releases/latest` 交给 Agent —— 那会被识别成 git 源去
 > 克隆，而本仓库不含构建产物 `lib/`，装上也加载不了。必须是上面这条以 `.tgz`
@@ -30,7 +30,7 @@ https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plug
 
 ```text
 请用插件管理工具安装这个 FHL 图像插件包：
-https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 
 安装完成后打开它的启用开关，然后让我完全退出并重新打开 App。
 之后新建会话，确认工具列表里有 fhl_image_configure、fhl_image_generate、fhl_image_edit。

@@ -1,57 +1,11 @@
 # Changelog
 
-## 0.2.4
-
-Every reference image now rides the repeated `image` multipart field. No change
-to the tool surface, the host half, the browser half or the stored credentials,
-so it is a drop-in replacement for `0.2.3`.
-
-### Fixed
-
-- **Multi-reference edits no longer drop every reference after the first.** The
-  edit form named the first reference `image` and every later one `image[]`. FHL
-  does not merge the two field names into one reference array, so the second and
-  later references uploaded but their identity contribution never reached the
-  model: face, glasses, hairstyle and clothing taken from reference 2 were lost
-  in multi-reference composites. Every reference now uses `image`, matching the
-  Codex plugin's `0.2.2` fix, which confirmed the effect on the live endpoint.
-
-### Changed
-
-- `src/client.ts`: the position-dependent `formSourceField(index)` helper is
-  replaced by a single `EDIT_SOURCE_FIELD` constant. The `mixed` and `array`
-  shapes the Codex plugin keeps for `--field-mode` diagnostics are not ported,
-  because this plugin has no diagnostic mode to carry them.
-- `tests/client.spec.ts`: the old mixed-shape pin is inverted, and a new case
-  drives a full `MAX_EDIT_SOURCES` edit to assert one `image` part per reference
-  and no `image[]` key at all.
-
-### Notes
-
-- The change is a protocol change and has **not** been re-verified against the
-  live FHL endpoint from this plugin; coverage here is unit tests only. See
-  `docs/changes/2026-10-14-0.2.4-reference-field.md`.
-
-## 0.2.3
-
-Adds a diagnostic row and an empty-pool notice. No change to the tool surface,
-the host half, or the stored credentials.
-
-### Added
-
-- **`fhl_image_configure` now has its own row**, showing the worker count it
-  reported and, when the set is empty, a short notice that keys can be sent in
-  chat to reconfigure. The row also settles a diagnosis the image rows cannot:
-  the image rows can only prove themselves by loading an image, so a blank one
-  is ambiguous between "the browser half never mounted" and "the gallery did not
-  paint". This row paints from the result text alone.
-- A spec case that renders the configure row with no image loader available.
-
 ## 0.2.2
 
-Generated and edited images now render in the conversation. No changes to the
-tool surface, the host half, or the stored credentials, so it is a drop-in
-replacement for `0.2.1`.
+Generated and edited images render in the conversation, `fhl_image_configure` has
+its own diagnostic row, and every edit reference rides the repeated `image`
+multipart field. No change to the tool surface, the host half, or the stored
+credentials, so it is a drop-in replacement for `0.2.1`.
 
 ### Added
 
@@ -65,11 +19,28 @@ replacement for `0.2.1`.
   `tool.call.toolview` entry for each of the two names; the row shows every
   durable image through the session-authorized `loadImage` loader and keeps the
   result envelope text beneath the gallery.
+- **`fhl_image_configure` now has its own row**, showing the worker count it
+  reported and, when the set is empty, a short notice that keys can be sent in
+  chat to reconfigure. The row also settles a diagnosis the image rows cannot:
+  the image rows can only prove themselves by loading an image, so a blank one
+  is ambiguous between "the browser half never mounted" and "the gallery did not
+  paint". This row paints from the result text alone.
 - `tests/ui-bundle.spec.ts`: five cases that load the *built* `lib/ui.js` behind
   a stubbed `window.__ModuleLoader__`, assert the registered id, the Cordis
   `apply`/`inject` surface, the two claimed keys, the absence of a child gallery
   declaration, and render the registered component through React to prove the
   gallery emits an `<img>` per reference with its envelope text.
+- A spec case that renders the configure row with no image loader available.
+
+### Fixed
+
+- **Multi-reference edits no longer drop every reference after the first.** The
+  edit form named the first reference `image` and every later one `image[]`. FHL
+  does not merge the two field names into one reference array, so the second and
+  later references uploaded but their identity contribution never reached the
+  model: face, glasses, hairstyle and clothing taken from reference 2 were lost
+  in multi-reference composites. Every reference now uses `image`, matching the
+  Codex plugin's `0.2.2` fix, which confirmed the effect on the live endpoint.
 
 ### Changed
 
@@ -84,6 +55,13 @@ replacement for `0.2.1`.
   the client contracts `src/ui.ts` compiles against are declared locally, and
   the value validation is runtime, so a contract drift degrades to the generic
   row rather than to a load failure.
+- `src/client.ts`: the position-dependent `formSourceField(index)` helper is
+  replaced by a single `EDIT_SOURCE_FIELD` constant. The `mixed` and `array`
+  shapes the Codex plugin keeps for `--field-mode` diagnostics are not ported,
+  because this plugin has no diagnostic mode to carry them.
+- `tests/client.spec.ts`: the old mixed-shape pin is inverted, and a new case
+  drives a full `MAX_EDIT_SOURCES` edit to assert one `image` part per reference
+  and no `image[]` key at all.
 
 ### Notes
 
@@ -92,6 +70,9 @@ replacement for `0.2.1`.
   declarer per child key, so a second declaration throws while the client loads.
 - The client half requires a full application restart to load; the host half
   alone still works without one.
+- The reference-field change is a protocol change and has **not** been
+  re-verified against the live FHL endpoint from this plugin; coverage here is
+  unit tests only. See `docs/changes/2026-10-14-0.2.2-reference-field.md`.
 
 ## 0.2.1
 

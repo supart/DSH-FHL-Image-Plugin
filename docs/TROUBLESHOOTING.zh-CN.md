@@ -6,7 +6,7 @@
 匹配。**正确做法是换用与该 DSH 版本对应的插件版本**。授予版本豁免会让不兼容的
 插件真的加载，可能崩溃或损坏数据，只应在你明确接受风险时使用。
 
-对应关系见 [安装说明](INSTALL.zh-CN.md) 开头的版本对照表：本插件 `0.2.1` 对应
+对应关系见 [安装说明](INSTALL.zh-CN.md) 开头的版本对照表：本插件 `0.2.2` 对应
 DSH `0.2.0-rc.2` 包线。
 
 ## 现象：Agent 说“没有工具”
@@ -97,7 +97,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-to-dsh.ps1 -Profile f
 - 安装日志 `~/.dsh/profiles/desktop/.plugin-manager/logs/<操作>/pnpm.log` 中的
   错误行（先确认其中没有凭据内容）。
 - 脱敏错误类型和时间。
-- 插件版本 `0.2.1` 与 DSH 版本（桌面版 `0.2.0-rc.2`）。
+- 插件版本 `0.2.2` 与 DSH 版本（桌面版 `0.2.0-rc.2`）。
 
 不要收集：API Key、Key 前后缀、Authorization、用户图片、base64、完整会话或
 包含私有路径的诊断包。

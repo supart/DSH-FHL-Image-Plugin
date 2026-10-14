@@ -15,9 +15,11 @@
 | `P10-desktop-0.2.0-port` | 2026-10-02 | Completed locally | Re-targeted the bundle to the official desktop line `0.2.0-rc.2`: peer ranges `>=0.2.0-rc.2 <0.3.0-0`, `Session.events` replaced by derived-message sourcing plus a bounded produced-image memory, deterministic bundle config, prompt section order 2500, no install-time build script, desktop-first docs. Typecheck, 20 tests, build, pack and sensitive scan passed; the tarball installed into the desktop profile through the plugin manager without a version exemption and registered all three tools live. Remote tag/Release and Windows desktop verification remain open. |
 | `P11-0.2.1-hardening` | 2026-10-08 | Completed | Hardened the desktop line against the shipped runtime rather than a source checkout. Fixed five defects: worker reconfiguration now clears slots above the supplied keys instead of leaving revoked keys live; local validation no longer shares the retryable transport code (a blank prompt used to fan out across every worker); implicit edit sources use the newest image rather than the whole produced set; padding-free/base64url/data-URI payloads decode; a failed response body is read as a bounded prefix and cancelled instead of buffered to 64 MiB. Extended redaction to the `task-fatal` rethrow path and to padded key spellings. Test suite 20 -> 71 cases including a new worker-pool suite, tool-execution coverage, and a built-artifact entry test; `tsconfig.test.json` now typechecks `tests/` and immediately surfaced four real fixture type errors. Added GitHub Actions CI on Node 22.19 and 24 with a tarball scan and a bundled-module resolution check, `.gitattributes`, `publishConfig`/`homepage`/`bugs`, a relaxed `~4.0.4` cordis peer, a single product-limit constant table, and the six README-linked Chinese docs in the tarball. A real `fhl_image_generate` request succeeded end to end. Published as `v0.2.1`: `main` and the development branch pushed, tag created, Release asset attached, CI green. |
 | `P12-client-image-row` | 2026-10-08 | Completed locally, browser acceptance pending | Added the browser half (`src/ui.ts`) that claims the keyed `tool.call.toolview` for `fhl_image_generate` and `fhl_image_edit`, so generated and edited images render in the conversation instead of a text-only row. Root cause read from the shipped client: the generic Tool card draws images only for `read_image` (`imageCardModel`), while a keyed toolview replaces that row. The registry permits exactly one declarer of the child `tool.call.images`, already owned by the read_image view, so the new entries claim their keys and render through the host-provided `loadImage` loader instead of declaring a child slot. The server pass gained a browser pass emitting `lib/ui.js` in the `window.__ModuleLoader__.load({ id, factory })` shape the client module loader registers, with React and the other platform seeds external; `tsconfig.test.json` typechecks the new source, and `tests/ui-bundle.spec.ts` loads the built bundle behind a stubbed loader and renders the registered component through React. Typecheck, 74 tests, build and pack pass; the browser row itself needs a desktop restart to observe and is not yet claimed. Version bumped to `0.2.2` because reinstalling an unchanged version reports `ambiguous-install`. |
+| `P13-0.2.2-release` | 2026-10-14 | Completed locally, publication pending | Delivered the two changes that complete the `0.2.2` release. `fhl_image_configure` gained its own diagnostic row plus an empty-pool notice, so a blank image row can no longer be confused with a configure row that never mounted. `fhl_image_edit` stopped labelling references by position: the edit form named the first reference `image` and every later one `image[]`, and FHL does not merge the two field names into one reference array, so every reference after the first uploaded without its identity contribution reaching the model. Every reference now rides the repeated `image` field, ported from the Codex plugin's `0.2.2` fix. The old mixed-shape pin in `tests/client.spec.ts` is inverted and a full `MAX_EDIT_SOURCES` case was added. `0.2.2` is the first version published after `0.2.1`: the two intermediate numbers this work was developed under were never released, so the release carries one merged changelog entry and the install docs point at `v0.2.2`. Typecheck, 78 tests, build, pack, the tarball sensitive scan and the bundled-module resolution check all pass. |
 
 Detailed evidence:
 
+- [`2026-10-14-0.2.2-reference-field.md`](docs/changes/2026-10-14-0.2.2-reference-field.md)
 - [`2026-10-08-0.2.2-client-image-row.md`](docs/changes/2026-10-08-0.2.2-client-image-row.md)
 - [`2026-10-08-0.2.1-hardening.md`](docs/changes/2026-10-08-0.2.1-hardening.md)
 - [`2026-10-02-desktop-0.2.0-port.md`](docs/changes/2026-10-02-desktop-0.2.0-port.md)
@@ -36,22 +38,18 @@ official desktop line `0.2.0-rc.2`, is installed and exercised in a local
 the Release carries the tarball, and CI is green on both branches. A real image
 request succeeded, which closes the last verification gap `0.2.0` left open.
 
-Version `0.2.2` adds the browser half that renders generated and edited images
-in the conversation. It is committed and pushed on `main`; it has no tag and no
-Release asset, so the published tarball still lacks the browser half until a
-release is cut, and the browser row itself has not yet been observed in a
-running desktop application (the client half loads only at startup, so
-acceptance needs a full quit, reopen and new session).
-
-Version `0.2.4` (2026-10-14) changes the multipart reference field naming: every
-reference now rides the repeated `image` field instead of `image` for the first
-and `image[]` for the rest. It is ported from the Codex plugin's `0.2.2` fix,
-which established on the live endpoint that FHL does not merge the two field
-names into one reference array, so the mixed shape dropped every reference after
-the first. This closes the item `0.2.1` recorded as deliberately deferred.
+Version `0.2.2` (2026-10-14) is the release cut after `0.2.1`. It carries three
+changes that were developed as separate steps but never published on their own,
+so they ship under one version number and one merged changelog entry: the
+browser half that renders generated and edited images in the conversation
+(`src/ui.ts`, `tests/ui-bundle.spec.ts`); `fhl_image_configure`'s own diagnostic
+row and the empty-pool notice; and the multipart reference field naming, where
+every reference now rides the repeated `image` field instead of `image` for the
+first and `image[]` for the rest.
 
 Still open: post-restart implicit-edit persistence is intentionally not claimed;
-Windows desktop verification has no record; the `0.2.2` browser row has no
-observed acceptance record; and the `0.2.4` reference-field change has not been
-re-verified against the live FHL endpoint from this plugin. Do not rewrite or
-force-push `v0.1.0`.
+Windows desktop verification has no record; the browser row has no observed
+acceptance record in a running desktop application (the client half loads only at
+startup, so acceptance needs a full quit, reopen and new session); and the
+reference-field change has not been re-verified against the live FHL endpoint
+from this plugin. Do not rewrite or force-push `v0.1.0`.

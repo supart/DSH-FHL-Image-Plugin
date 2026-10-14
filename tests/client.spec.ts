@@ -165,7 +165,7 @@ describe('FHL Images client', () => {
     expect(form?.get('output_format')).toBe('png')
     // Pins the shipped wire shape: every reference uses the repeated `image`
     // field. FHL does not merge `image` and `image[]` into one reference array,
-    // so the mixed shape that shipped through 0.2.3 dropped every reference
+    // so the mixed shape that shipped through 0.2.1 dropped every reference
     // after the first.
     expect(form?.getAll('image')).toHaveLength(2)
     expect(Array.from(form?.keys() ?? [])).not.toContain('image[]')

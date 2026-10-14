@@ -1,4 +1,4 @@
-# DSH FHL Image 0.2.1
+# DSH FHL Image 0.2.2
 
 [中文](#fhl-zh) · [English](#fhl-en)
 
@@ -18,16 +18,17 @@
 
 | 插件版本 | 目标 DSH | 状态 |
 | --- | --- | --- |
-| `0.2.1` | 官方桌面版 `0.2.0-rc.2` 包线 | 当前版本 |
+| `0.2.2` | 官方桌面版 `0.2.0-rc.2` 包线 | 当前版本 |
+| `0.2.1` | 官方桌面版 `0.2.0-rc.2` 包线 | 旧版本 |
 | `0.1.0` | 旧 `0.1.1-rc.1` 包线 | 已不再支持 |
 
-安装包：`fhl-plugins-dsh-fhl-image-0.2.1.tgz`（Release 附件，或本地
+安装包：`fhl-plugins-dsh-fhl-image-0.2.2.tgz`（Release 附件，或本地
 `pnpm build && pnpm pack` 生成）。`.tgz` 是插件包，**不能双击运行**。
 
 下载直链：
 
 ```text
-https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 ```
 
 ### 安装
@@ -38,7 +39,7 @@ https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plug
 
 ```text
 请用插件管理工具安装这个 FHL 图像插件包：
-https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 
 安装完成后打开它的启用开关，然后让我完全退出并重新打开 App。
 之后新建会话，确认工具列表里有 fhl_image_configure、fhl_image_generate、fhl_image_edit。
@@ -68,7 +69,7 @@ https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plug
 **命令行版 DSH（进阶）**
 
 ```sh
-dsh plugin --profile fhl-image add /绝对路径/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+dsh plugin --profile fhl-image add /绝对路径/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 dsh --profile fhl-image --dump-config
 dsh --profile fhl-image
 ```
@@ -184,7 +185,8 @@ chat.
 
 | Plugin | Target DSH | Status |
 | --- | --- | --- |
-| `0.2.1` | Official desktop line `0.2.0-rc.2` | Current |
+| `0.2.2` | Official desktop line `0.2.0-rc.2` | Current |
+| `0.2.1` | Official desktop line `0.2.0-rc.2` | Superseded |
 | `0.1.0` | Legacy `0.1.1-rc.1` line | Unsupported |
 
 DSH 0.2 checks every `@deepseek-ai/dsh*` peer range against the running runtime
@@ -208,14 +210,14 @@ the plugin version alone — decide whether installation is accepted.
 Download link:
 
 ```text
-https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 ```
 
 **One-prompt install (recommended).** Send this in your own DSH session:
 
 ```text
 Install this FHL image plugin bundle with the plugin manager tool:
-https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.1/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+https://github.com/supart/DSH-FHL-Image-Plugin/releases/download/v0.2.2/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 
 Then switch it on and tell me to fully quit and reopen the application.
 Afterwards, start a new session and confirm the tool list contains
@@ -242,7 +244,7 @@ from an external shell.
 **CLI profiles.**
 
 ```sh
-dsh plugin --profile fhl-image add /absolute/path/fhl-plugins-dsh-fhl-image-0.2.1.tgz
+dsh plugin --profile fhl-image add /absolute/path/fhl-plugins-dsh-fhl-image-0.2.2.tgz
 dsh --profile fhl-image --dump-config
 dsh --profile fhl-image
 ```

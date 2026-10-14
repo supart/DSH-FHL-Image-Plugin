@@ -1,6 +1,6 @@
 {
   "name": "@fhl-plugins/dsh-fhl-image",
-  "version": "0.2.4",
+  "version": "0.2.2",
   "description": "Independent DeepSeek Harness bundle for FHL Images generation, editing, worker pools, and chat-configured credentials.",
   "type": "module",
   "license": "MIT",

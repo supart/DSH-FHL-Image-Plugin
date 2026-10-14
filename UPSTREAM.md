@@ -7,7 +7,7 @@ FHL Harness workspaces.
 ## Target Compatibility
 
 - DSH published package line: `0.2.0-rc.2` (the line shipped by the official
-  desktop application; plugin version `0.2.1`)
+  desktop application; plugin version `0.2.2`)
 - Cordis: `4.0.4`
 - Schemastery: `3.18.4`
 - Node.js: `>=22.19.0` (the desktop runtime ships Node 24)
