@@ -32,6 +32,9 @@ import * as React from 'react'
 /** The two Tool names that carry durable images and therefore claim a view. */
 const TOOL_VIEW_KEYS = ['fhl_image_generate', 'fhl_image_edit'] as const
 
+/** The configuration Tool, claimed so the browser half has a text-only row to prove itself with. */
+const CONFIGURE_VIEW_KEY = 'fhl_image_configure'
+
 /**
  * Inline styles, not a stylesheet: this entry injects no CSS, so every rule the
  * gallery needs travels with the element. The host's own image card frames its
@@ -224,20 +227,52 @@ function FhlImageToolView(props: ToolCallViewProps): React.ReactNode {
   )
 }
 
+/**
+ * The claimed row for `fhl_image_configure`: the worker count it reports, and a
+ * visible notice when the whole worker set is empty.
+ *
+ * This row doubles as the browser half's probe. The image rows can only prove
+ * themselves by loading an image, so a failure there is ambiguous between "the
+ * bundle never mounted" and "the gallery did not paint"; this row paints from
+ * the result text alone, so seeing it means the client half is mounted and
+ * dispatching.
+ * @param props - phase-discriminated props from the Tool tree.
+ * @returns the row body, or null before the result phase.
+ */
+function FhlImageConfigureView(props: ToolCallViewProps): React.ReactNode {
+  const content = props.phase === 'result' ? props.block.content : undefined
+  const summary = content === undefined ? '' : readTexts(content).join(' ')
+  if (content === undefined || summary.length === 0) return null
+
+  const empty = /Configured\s+0\s+FHL image worker/iu.test(summary)
+  return React.createElement(
+    'div',
+    { style: ROW_STYLE },
+    React.createElement('div', { style: ENVELOPE_STYLE }, summary),
+    empty
+      ? React.createElement('div', { style: ENVELOPE_STYLE }, '没有可用 Worker：把 Key 发到会话里即可重新配置。')
+      : null,
+  )
+}
+
 /** Services this client entry reads. */
 export const inject = ['slots']
 
 /**
- * Claim the view for both image-bearing Tool names.
+ * Claim the view for the tool names this bundle presents.
  *
  * The keys are claimed rather than a child gallery slot declared: `tool.call.images`
  * is already declared by the built-in read_image view and the registry permits
  * exactly one declarer per child key, so declaring it here would throw at load.
- * No `locale` is declared because this view renders no translated string, and
+ * No `locale` is declared because these views render no translated string, and
  * declaring a namespace demands an installed dictionary face.
  * @param ctx - client root context carrying the slot service.
  */
 export function apply(ctx: ClientContext): void {
+  ctx.slots.inject('tool.call.toolview', () => ctx.slots.register(
+    { name: 'tool.call.toolview', key: CONFIGURE_VIEW_KEY },
+    FhlImageConfigureView as (props: never) => React.ReactNode,
+  ))
   for (const key of TOOL_VIEW_KEYS) {
     ctx.slots.inject('tool.call.toolview', () => ctx.slots.register(
       { name: 'tool.call.toolview', key },

@@ -98,14 +98,19 @@ describe('built client half', () => {
     expect(loaded[0]?.requested).toContain('react')
   })
 
-  it('claims a keyed toolview for both image-bearing tool names', async () => {
+  it('claims a keyed toolview for each tool this bundle presents', async () => {
     const loaded = await loadClientBundle()
     const slots = recordingSlots()
 
     loaded[0]?.surface.apply?.({ slots: slots.service })
 
-    expect(slots.injected).toEqual(['tool.call.toolview', 'tool.call.toolview'])
+    expect(slots.injected).toEqual([
+      'tool.call.toolview',
+      'tool.call.toolview',
+      'tool.call.toolview',
+    ])
     expect(slots.registrations).toEqual([
+      { name: 'tool.call.toolview', key: 'fhl_image_configure' },
       { name: 'tool.call.toolview', key: 'fhl_image_generate' },
       { name: 'tool.call.toolview', key: 'fhl_image_edit' },
     ])
@@ -122,11 +127,33 @@ describe('built client half', () => {
 
     loaded[0]?.surface.apply?.({ slots: slots.service })
 
-    expect(slots.registrations).toHaveLength(2)
+    expect(slots.registrations).toHaveLength(3)
     for (const options of slots.registrations) {
       expect(Object.keys(options).sort()).toEqual(['key', 'name'])
       expect(options.children).toBeUndefined()
     }
+  })
+
+  it('paints the configure row from the result text, without loading an image', async () => {
+    // This row is the browser half's probe: it proves the client half mounted
+    // and dispatched without depending on the image loader, so a silent image
+    // row can be told apart from a client half that never loaded.
+    const loaded = await loadClientBundle()
+    const slots = recordingSlots()
+    loaded[0]?.surface.apply?.({ slots: slots.service })
+
+    const component = slots.components.get('fhl_image_configure')
+    expect(component).toBeDefined()
+
+    const html = renderToStaticMarkup(React.createElement(component as never, {
+      phase: 'result',
+      toolName: 'fhl_image_configure',
+      callId: 'call-3',
+      block: { content: [{ type: 'text', text: 'Configured 0 FHL image worker(s).' }], isError: false },
+    } as never))
+
+    expect(html).toContain('Configured 0 FHL image worker(s).')
+    expect(html).toContain('没有可用 Worker')
   })
 
   it('renders every durable image with its envelope text', async () => {

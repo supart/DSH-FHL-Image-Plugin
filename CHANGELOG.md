@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.3
+
+Adds a diagnostic row and an empty-pool notice. No change to the tool surface,
+the host half, or the stored credentials.
+
+### Added
+
+- **`fhl_image_configure` now has its own row**, showing the worker count it
+  reported and, when the set is empty, a short notice that keys can be sent in
+  chat to reconfigure. The row also settles a diagnosis the image rows cannot:
+  the image rows can only prove themselves by loading an image, so a blank one
+  is ambiguous between "the browser half never mounted" and "the gallery did not
+  paint". This row paints from the result text alone.
+- A spec case that renders the configure row with no image loader available.
+
 ## 0.2.2
 
 Generated and edited images now render in the conversation. No changes to the
